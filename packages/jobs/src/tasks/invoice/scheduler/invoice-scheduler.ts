@@ -1,5 +1,6 @@
+import { getDb } from "@jobs/init";
 import { triggerBatch } from "@jobs/utils/trigger-batch";
-import { createClient } from "@midday/supabase/job";
+import { getInvoiceIdsByStatus } from "@midday/db/queries";
 import { logger, schedules } from "@trigger.dev/sdk/v3";
 import { checkInvoiceStatus } from "../operations/check-status";
 
@@ -10,12 +11,9 @@ export const invoiceScheduler = schedules.task({
     // Only run in production (Set in Trigger.dev)
     if (process.env.TRIGGER_ENVIRONMENT !== "production") return;
 
-    const supabase = createClient();
-
-    const { data: invoices } = await supabase
-      .from("invoices")
-      .select("id")
-      .in("status", ["unpaid", "overdue"]);
+    const invoices = await getInvoiceIdsByStatus(getDb(), {
+      statuses: ["unpaid", "overdue"],
+    });
 
     if (!invoices) return;
 

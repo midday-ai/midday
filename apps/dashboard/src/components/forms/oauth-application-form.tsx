@@ -32,7 +32,6 @@ import { Tabs, TabsList, TabsTrigger } from "@midday/ui/tabs";
 import { Textarea } from "@midday/ui/textarea";
 import { useToast } from "@midday/ui/use-toast";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { nanoid } from "nanoid";
 import { useEffect, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { useFieldArray } from "react-hook-form";
@@ -324,13 +323,9 @@ export function OAuthApplicationForm({ data }: Props) {
     try {
       const uploadedUrls = await Promise.all(
         imageFiles.map(async (file) => {
-          const originalFilename = file.name ?? "";
-          const extension = originalFilename.split(".").pop() || "";
-          const filename = extension ? `${nanoid()}.${extension}` : nanoid();
-
           const { url } = await uploadFile({
             bucket: "apps",
-            path: ["screenshots", filename],
+            path: ["screenshots"],
             file,
           });
 

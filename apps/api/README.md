@@ -22,15 +22,16 @@ Two separate Redis instances are used:
 
 #### Local Development Setup
 
-1. **Start Redis with Docker:**
-   ```bash
-   docker run -d --name redis -p 6379:6379 redis:alpine
-   ```
+Follow the [local development guide](../../docs/local-development.md). Supabase remains the default; select `NEXT_PUBLIC_BACKEND_PROVIDER=local` consistently across apps to use the standalone local backend.
 
-2. **Set environment variable:**
-   ```bash
-   export REDIS_URL=redis://localhost:6379
-   ```
+```bash
+# From the repository root, for local mode:
+bun run infra:up
+# After completing the guide's environment and migration setup:
+bun run dev:api
+```
+
+For a Supabase development project, Redis alone can be started with `docker compose up -d --wait redis`. Preserve the project's configuration and do not run the local baseline against it.
 
 #### Database Configuration
 ```bash

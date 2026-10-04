@@ -46,6 +46,7 @@ import {
 } from "../utils/transaction-matching";
 import { createActivity } from "./activities";
 import { type Attachment, createAttachments } from "./transaction-attachments";
+import { transactionIsFulfilled } from "./transaction-jobs";
 
 const logger = createLoggerWithContext("transactions");
 
@@ -145,14 +146,7 @@ export async function getTransactions(
     }
   }
 
-  const isFulfilledCondition = sql`(
-    EXISTS (
-      SELECT 1
-      FROM ${transactionAttachments}
-      WHERE ${eq(transactionAttachments.transactionId, transactions.id)}
-      AND ${eq(transactionAttachments.teamId, teamId)}
-    ) OR ${transactions.status} = 'completed'
-  )`;
+  const isFulfilledCondition = transactionIsFulfilled(teamId);
 
   const isExportedCondition = sql`(
     ${transactions.status} = 'exported' OR EXISTS (
@@ -1921,43 +1915,7 @@ export async function createTransactions(
   return fullTransactions.filter((transaction) => transaction !== null);
 }
 
-export type UpsertTransactionData = {
-  name: string;
-  date: string;
-  method: "other" | "card_purchase" | "transfer";
-  amount: number;
-  currency: string;
-  teamId: string;
-  bankAccountId: string | null;
-  internalId: string;
-  status: "pending" | "completed" | "archived" | "posted" | "excluded";
-  manual: boolean;
-  categorySlug?: string | null;
-  description?: string | null;
-  balance?: number | null;
-  note?: string | null;
-  counterpartyName?: string | null;
-  merchantName?: string | null;
-  assignedId?: string | null;
-  internal?: boolean;
-  notified?: boolean;
-  baseAmount?: number | null;
-  baseCurrency?: string | null;
-  taxAmount?: number | null;
-  taxRate?: number | null;
-  taxType?: string | null;
-  recurring?: boolean;
-  frequency?:
-    | "weekly"
-    | "biweekly"
-    | "monthly"
-    | "semi_monthly"
-    | "annually"
-    | "irregular"
-    | "unknown"
-    | null;
-  enrichmentCompleted?: boolean;
-};
+export type UpsertTransactionData = typeof transactions.$inferInsert;
 
 export type UpsertTransactionsParams = {
   transactions: UpsertTransactionData[];
@@ -1971,24 +1929,38 @@ export type UpsertTransactionsParams = {
 export async function upsertTransactions(
   db: Database,
   params: UpsertTransactionsParams,
-): Promise<Array<{ id: string }>> {
-  // Exclude teamId from the params
-  const { transactions: transactionsData, teamId: _teamId } = params;
-  if (transactionsData.length === 0) {
-    return [];
+) {
+  if (params.transactions.length === 0) return [];
+  const accountIds = [
+    ...new Set(
+      params.transactions
+        .map((row) => row.bankAccountId)
+        .filter((id): id is string => !!id),
+    ),
+  ];
+  if (accountIds.length > 0) {
+    const accounts = await db
+      .select({ id: bankAccounts.id })
+      .from(bankAccounts)
+      .where(
+        and(
+          inArray(bankAccounts.id, accountIds),
+          eq(bankAccounts.teamId, params.teamId),
+        ),
+      );
+    if (accounts.length !== accountIds.length)
+      throw new Error("Bank account not found for team");
   }
-
-  const upserted = await db
+  return db
     .insert(transactions)
-    .values(transactionsData)
-    .onConflictDoNothing({
-      target: [transactions.internalId],
-    })
-    .returning({
-      id: transactions.id,
-    });
-
-  return upserted;
+    .values(
+      params.transactions.map((transaction) => ({
+        ...transaction,
+        teamId: params.teamId,
+      })),
+    )
+    .onConflictDoNothing({ target: [transactions.internalId] })
+    .returning({ id: transactions.id });
 }
 
 export type GetTransactionsByAccountIdParams = {

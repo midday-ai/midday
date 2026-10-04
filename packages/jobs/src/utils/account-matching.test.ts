@@ -3,7 +3,7 @@ import {
   type ApiAccount,
   type DbAccount,
   findMatchingAccount,
-} from "@midday/supabase/account-matching";
+} from "@midday/banking/account-matching";
 
 describe("findMatchingAccount", () => {
   const createDbAccount = (overrides: Partial<DbAccount> = {}): DbAccount => ({

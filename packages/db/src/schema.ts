@@ -10,7 +10,6 @@ import {
   json,
   jsonb,
   pgEnum,
-  pgPolicy,
   pgTable,
   primaryKey,
   smallint,
@@ -313,14 +312,7 @@ export const documentTagEmbeddings = pgTable(
     name: text().notNull(),
     model: text().notNull().default("gemini-embedding-001"),
   },
-  (table) => [
-    pgPolicy("Enable insert for authenticated users only", {
-      as: "permissive",
-      for: "insert",
-      to: ["authenticated"],
-      withCheck: sql`true`,
-    }),
-  ],
+  (table) => [],
 );
 
 export const transactionCategoryEmbeddings = pgTable(
@@ -342,24 +334,6 @@ export const transactionCategoryEmbeddings = pgTable(
       "btree",
       table.system.asc().nullsLast().op("bool_ops"),
     ),
-    pgPolicy("Enable read access for authenticated users", {
-      as: "permissive",
-      for: "select",
-      to: ["authenticated"],
-      using: sql`true`,
-    }),
-    pgPolicy("Enable insert for authenticated users only", {
-      as: "permissive",
-      for: "insert",
-      to: ["authenticated"],
-      withCheck: sql`true`,
-    }),
-    pgPolicy("Enable update for authenticated users only", {
-      as: "permissive",
-      for: "update",
-      to: ["authenticated"],
-      using: sql`true`,
-    }),
   ],
 );
 
@@ -437,14 +411,14 @@ export const transactions = pgTable(
     ),
     index("idx_transactions_team_id_date_name").using(
       "btree",
-      table.teamId.asc().nullsLast().op("date_ops"),
+      table.teamId.asc().nullsLast(),
       table.date.asc().nullsLast().op("date_ops"),
-      table.name.asc().nullsLast().op("uuid_ops"),
+      table.name.asc().nullsLast(),
     ),
     index("idx_transactions_team_id_name").using(
       "btree",
       table.teamId.asc().nullsLast().op("uuid_ops"),
-      table.name.asc().nullsLast().op("uuid_ops"),
+      table.name.asc().nullsLast(),
     ),
     index("idx_trgm_name").using(
       "gist",
@@ -466,10 +440,10 @@ export const transactions = pgTable(
       "transactions_team_id_date_currency_bank_account_id_category_idx",
     ).using(
       "btree",
-      table.teamId.asc().nullsLast().op("enum_ops"),
+      table.teamId.asc().nullsLast(),
       table.date.asc().nullsLast().op("date_ops"),
       table.currency.asc().nullsLast().op("text_ops"),
-      table.bankAccountId.asc().nullsLast().op("date_ops"),
+      table.bankAccountId.asc().nullsLast(),
     ),
     index("transactions_team_id_idx").using(
       "btree",
@@ -507,27 +481,6 @@ export const transactions = pgTable(
       name: "transactions_category_slug_team_id_fkey",
     }),
     unique("transactions_internal_id_key").on(table.internalId),
-    pgPolicy("Transactions can be created by a member of the team", {
-      as: "permissive",
-      for: "insert",
-      to: ["public"],
-      withCheck: sql`(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))`,
-    }),
-    pgPolicy("Transactions can be deleted by a member of the team", {
-      as: "permissive",
-      for: "delete",
-      to: ["public"],
-    }),
-    pgPolicy("Transactions can be selected by a member of the team", {
-      as: "permissive",
-      for: "select",
-      to: ["public"],
-    }),
-    pgPolicy("Transactions can be updated by a member of the team", {
-      as: "permissive",
-      for: "update",
-      to: ["public"],
-    }),
   ],
 );
 
@@ -573,27 +526,6 @@ export const trackerEntries = pgTable(
       foreignColumns: [teams.id],
       name: "tracker_entries_team_id_fkey",
     }).onDelete("cascade"),
-    pgPolicy("Entries can be created by a member of the team", {
-      as: "permissive",
-      for: "insert",
-      to: ["authenticated"],
-      withCheck: sql`(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))`,
-    }),
-    pgPolicy("Entries can be deleted by a member of the team", {
-      as: "permissive",
-      for: "delete",
-      to: ["authenticated"],
-    }),
-    pgPolicy("Entries can be selected by a member of the team", {
-      as: "permissive",
-      for: "select",
-      to: ["authenticated"],
-    }),
-    pgPolicy("Entries can be updated by a member of the team", {
-      as: "permissive",
-      for: "update",
-      to: ["authenticated"],
-    }),
   ],
 );
 
@@ -625,12 +557,6 @@ export const customerTags = pgTable(
       name: "customer_tags_team_id_fkey",
     }).onDelete("cascade"),
     unique("unique_customer_tag").on(table.customerId, table.tagId),
-    pgPolicy("Tags can be handled by a member of the team", {
-      as: "permissive",
-      for: "all",
-      to: ["public"],
-      using: sql`(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))`,
-    }),
   ],
 );
 
@@ -667,22 +593,6 @@ export const inboxAccounts = pgTable(
     }).onDelete("cascade"),
     unique("inbox_accounts_email_key").on(table.email),
     unique("inbox_accounts_external_id_key").on(table.externalId),
-    pgPolicy("Inbox accounts can be deleted by a member of the team", {
-      as: "permissive",
-      for: "delete",
-      to: ["public"],
-      using: sql`(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))`,
-    }),
-    pgPolicy("Inbox accounts can be selected by a member of the team", {
-      as: "permissive",
-      for: "select",
-      to: ["public"],
-    }),
-    pgPolicy("Inbox accounts can be updated by a member of the team", {
-      as: "permissive",
-      for: "update",
-      to: ["public"],
-    }),
   ],
 );
 
@@ -749,27 +659,6 @@ export const bankAccounts = pgTable(
       foreignColumns: [teams.id],
       name: "public_bank_accounts_team_id_fkey",
     }).onDelete("cascade"),
-    pgPolicy("Bank Accounts can be created by a member of the team", {
-      as: "permissive",
-      for: "insert",
-      to: ["public"],
-      withCheck: sql`(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))`,
-    }),
-    pgPolicy("Bank Accounts can be deleted by a member of the team", {
-      as: "permissive",
-      for: "delete",
-      to: ["public"],
-    }),
-    pgPolicy("Bank Accounts can be selected by a member of the team", {
-      as: "permissive",
-      for: "select",
-      to: ["public"],
-    }),
-    pgPolicy("Bank Accounts can be updated by a member of the team", {
-      as: "permissive",
-      for: "update",
-      to: ["public"],
-    }),
   ],
 );
 
@@ -872,12 +761,6 @@ export const invoiceRecurring = pgTable(
       foreignColumns: [invoiceTemplates.id],
       name: "invoice_recurring_template_id_fkey",
     }).onDelete("set null"),
-    pgPolicy("Invoice recurring can be handled by a member of the team", {
-      as: "permissive",
-      for: "all",
-      to: ["public"],
-      using: sql`(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))`,
-    }),
   ],
 );
 
@@ -1030,12 +913,6 @@ export const invoices = pgTable(
       .on(table.customerId)
       .where(sql`customer_id IS NOT NULL`),
     index("invoices_team_created_at_idx").on(table.teamId, table.createdAt),
-    pgPolicy("Invoices can be handled by a member of the team", {
-      as: "permissive",
-      for: "all",
-      to: ["public"],
-      using: sql`(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))`,
-    }),
   ],
 );
 
@@ -1143,12 +1020,6 @@ export const customers = pgTable(
       foreignColumns: [teams.id],
       name: "customers_team_id_fkey",
     }).onDelete("cascade"),
-    pgPolicy("Customers can be handled by members of the team", {
-      as: "permissive",
-      for: "all",
-      to: ["public"],
-      using: sql`(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))`,
-    }),
   ],
 );
 
@@ -1168,12 +1039,6 @@ export const exchangeRates = pgTable(
       table.target.asc().nullsLast().op("text_ops"),
     ),
     unique("unique_rate").on(table.base, table.target),
-    pgPolicy("Enable read access for authenticated users", {
-      as: "permissive",
-      for: "select",
-      to: ["public"],
-      using: sql`true`,
-    }),
   ],
 );
 
@@ -1198,12 +1063,6 @@ export const tags = pgTable(
       name: "tags_team_id_fkey",
     }).onDelete("cascade"),
     unique("unique_tag_name").on(table.teamId, table.name),
-    pgPolicy("Tags can be handled by a member of the team", {
-      as: "permissive",
-      for: "all",
-      to: ["public"],
-      using: sql`(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))`,
-    }),
   ],
 );
 
@@ -1244,12 +1103,6 @@ export const trackerReports = pgTable(
     })
       .onUpdate("cascade")
       .onDelete("cascade"),
-    pgPolicy("Reports can be handled by a member of the team", {
-      as: "permissive",
-      for: "all",
-      to: ["public"],
-      using: sql`(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))`,
-    }),
   ],
 );
 
@@ -1298,12 +1151,6 @@ export const trackerProjectTags = pgTable(
       name: "tracker_project_tags_team_id_fkey",
     }).onDelete("cascade"),
     unique("unique_project_tag").on(table.trackerProjectId, table.tagId),
-    pgPolicy("Tags can be handled by a member of the team", {
-      as: "permissive",
-      for: "all",
-      to: ["public"],
-      using: sql`(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))`,
-    }),
   ],
 );
 
@@ -1339,27 +1186,6 @@ export const reports = pgTable(
       foreignColumns: [teams.id],
       name: "reports_team_id_fkey",
     }).onDelete("cascade"),
-    pgPolicy("Reports can be created by a member of the team", {
-      as: "permissive",
-      for: "insert",
-      to: ["public"],
-      withCheck: sql`(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))`,
-    }),
-    pgPolicy("Reports can be deleted by a member of the team", {
-      as: "permissive",
-      for: "delete",
-      to: ["public"],
-    }),
-    pgPolicy("Reports can be selected by a member of the team", {
-      as: "permissive",
-      for: "select",
-      to: ["public"],
-    }),
-    pgPolicy("Reports can be updated by member of team", {
-      as: "permissive",
-      for: "update",
-      to: ["public"],
-    }),
   ],
 );
 
@@ -1428,27 +1254,6 @@ export const bankConnections = pgTable(
       name: "bank_connections_team_id_fkey",
     }).onDelete("cascade"),
     unique("unique_bank_connections").on(table.institutionId, table.teamId),
-    pgPolicy("Bank Connections can be created by a member of the team", {
-      as: "permissive",
-      for: "insert",
-      to: ["public"],
-      withCheck: sql`(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))`,
-    }),
-    pgPolicy("Bank Connections can be deleted by a member of the team", {
-      as: "permissive",
-      for: "delete",
-      to: ["public"],
-    }),
-    pgPolicy("Bank Connections can be selected by a member of the team", {
-      as: "permissive",
-      for: "select",
-      to: ["public"],
-    }),
-    pgPolicy("Bank Connections can be updated by a member of the team", {
-      as: "permissive",
-      for: "update",
-      to: ["public"],
-    }),
   ],
 );
 
@@ -1462,7 +1267,7 @@ export const userInvites = pgTable(
     teamId: uuid("team_id"),
     email: text(),
     role: teamRolesEnum(),
-    code: text().default("nanoid(24)"),
+    code: text().default(sql`nanoid(24)`),
     invitedBy: uuid("invited_by"),
   },
   (table) => [
@@ -1482,37 +1287,6 @@ export const userInvites = pgTable(
     }).onDelete("cascade"),
     unique("unique_team_invite").on(table.teamId, table.email),
     unique("user_invites_code_key").on(table.code),
-    pgPolicy("Enable select for users based on email", {
-      as: "permissive",
-      for: "select",
-      to: ["public"],
-      using: sql`((auth.jwt() ->> 'email'::text) = email)`,
-    }),
-    pgPolicy("User Invites can be created by a member of the team", {
-      as: "permissive",
-      for: "insert",
-      to: ["public"],
-    }),
-    pgPolicy("User Invites can be deleted by a member of the team", {
-      as: "permissive",
-      for: "delete",
-      to: ["public"],
-    }),
-    pgPolicy("User Invites can be deleted by invited email", {
-      as: "permissive",
-      for: "delete",
-      to: ["public"],
-    }),
-    pgPolicy("User Invites can be selected by a member of the team", {
-      as: "permissive",
-      for: "select",
-      to: ["public"],
-    }),
-    pgPolicy("User Invites can be updated by a member of the team", {
-      as: "permissive",
-      for: "update",
-      to: ["public"],
-    }),
   ],
 );
 
@@ -1534,12 +1308,6 @@ export const documentTags = pgTable(
       name: "document_tags_team_id_fkey",
     }).onDelete("cascade"),
     unique("unique_slug_per_team").on(table.slug, table.teamId),
-    pgPolicy("Tags can be handled by a member of the team", {
-      as: "permissive",
-      for: "all",
-      to: ["public"],
-      using: sql`(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))`,
-    }),
   ],
 );
 
@@ -1585,12 +1353,6 @@ export const transactionTags = pgTable(
       name: "transaction_tags_transaction_id_fkey",
     }).onDelete("cascade"),
     unique("unique_tag").on(table.tagId, table.transactionId),
-    pgPolicy("Transaction Tags can be handled by a member of the team", {
-      as: "permissive",
-      for: "all",
-      to: ["public"],
-      using: sql`(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))`,
-    }),
   ],
 );
 
@@ -1628,26 +1390,6 @@ export const transactionAttachments = pgTable(
       foreignColumns: [transactions.id],
       name: "public_transaction_attachments_transaction_id_fkey",
     }).onDelete("set null"),
-    pgPolicy("Transaction Attachments can be created by a member of the team", {
-      as: "permissive",
-      for: "insert",
-      to: ["public"],
-      withCheck: sql`(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))`,
-    }),
-    pgPolicy("Transaction Attachments can be deleted by a member of the team", {
-      as: "permissive",
-      for: "delete",
-      to: ["public"],
-    }),
-    pgPolicy(
-      "Transaction Attachments can be selected by a member of the team",
-      { as: "permissive", for: "select", to: ["public"] },
-    ),
-    pgPolicy("Transaction Attachments can be updated by a member of the team", {
-      as: "permissive",
-      for: "update",
-      to: ["public"],
-    }),
   ],
 );
 
@@ -1660,7 +1402,7 @@ export const teams = pgTable(
       .notNull(),
     name: text(),
     logoUrl: text("logo_url"),
-    inboxId: text("inbox_id").default("generate_inbox(10)"),
+    inboxId: text("inbox_id").default(sql`generate_inbox(10)`),
     email: text(),
     inboxEmail: text("inbox_email"),
     inboxForwarding: boolean("inbox_forwarding").default(true),
@@ -1681,35 +1423,7 @@ export const teams = pgTable(
     companyType: text("company_type"),
     heardAbout: text("heard_about"),
   },
-  (table) => [
-    unique("teams_inbox_id_key").on(table.inboxId),
-    pgPolicy("Enable insert for authenticated users only", {
-      as: "permissive",
-      for: "insert",
-      to: ["authenticated"],
-      withCheck: sql`true`,
-    }),
-    pgPolicy("Invited users can select team if they are invited.", {
-      as: "permissive",
-      for: "select",
-      to: ["public"],
-    }),
-    pgPolicy("Teams can be deleted by a member of the team", {
-      as: "permissive",
-      for: "delete",
-      to: ["public"],
-    }),
-    pgPolicy("Teams can be selected by a member of the team", {
-      as: "permissive",
-      for: "select",
-      to: ["public"],
-    }),
-    pgPolicy("Teams can be updated by a member of the team", {
-      as: "permissive",
-      for: "update",
-      to: ["public"],
-    }),
-  ],
+  (table) => [unique("teams_inbox_id_key").on(table.inboxId)],
 );
 
 export const documents = pgTable(
@@ -1730,12 +1444,10 @@ export const documents = pgTable(
     tag: text(),
     title: text(),
     body: text(),
-    fts: tsvector("fts")
-      .notNull()
-      .generatedAlwaysAs(
-        (): SQL =>
-          sql`to_tsvector('english'::regconfig, ((title || ' '::text) || body))`,
-      ),
+    fts: tsvector("fts").generatedAlwaysAs(
+      (): SQL =>
+        sql`to_tsvector('english'::regconfig, ((title || ' '::text) || body))`,
+    ),
     summary: text(),
     content: text(),
     date: date(),
@@ -1757,7 +1469,7 @@ export const documents = pgTable(
     ),
     index("documents_team_id_parent_id_idx").using(
       "btree",
-      table.teamId.asc().nullsLast().op("text_ops"),
+      table.teamId.asc().nullsLast(),
       table.parentId.asc().nullsLast().op("text_ops"),
     ),
     // Composite index for common query pattern: teamId + createdAt DESC
@@ -1776,6 +1488,7 @@ export const documents = pgTable(
     ),
     // Composite index for teamId + name queries
     // Used by getDocumentById, updateDocumentByFileName, updateDocuments
+    uniqueIndex("documents_team_id_name_key").on(table.teamId, table.name),
     index("documents_team_id_name_idx").using(
       "btree",
       table.teamId.asc().nullsLast().op("uuid_ops"),
@@ -1811,27 +1524,6 @@ export const documents = pgTable(
       foreignColumns: [teams.id],
       name: "storage_team_id_fkey",
     }).onDelete("cascade"),
-    pgPolicy("Documents can be deleted by a member of the team", {
-      as: "permissive",
-      for: "all",
-      to: ["public"],
-      using: sql`(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))`,
-    }),
-    pgPolicy("Documents can be selected by a member of the team", {
-      as: "permissive",
-      for: "all",
-      to: ["public"],
-    }),
-    pgPolicy("Documents can be updated by a member of the team", {
-      as: "permissive",
-      for: "update",
-      to: ["public"],
-    }),
-    pgPolicy("Enable insert for authenticated users only", {
-      as: "permissive",
-      for: "insert",
-      to: ["authenticated"],
-    }),
   ],
 );
 
@@ -1861,27 +1553,6 @@ export const apps = pgTable(
       name: "integrations_team_id_fkey",
     }).onDelete("cascade"),
     unique("unique_app_id_team_id").on(table.teamId, table.appId),
-    pgPolicy("Apps can be deleted by a member of the team", {
-      as: "permissive",
-      for: "delete",
-      to: ["public"],
-      using: sql`(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))`,
-    }),
-    pgPolicy("Apps can be inserted by a member of the team", {
-      as: "permissive",
-      for: "insert",
-      to: ["public"],
-    }),
-    pgPolicy("Apps can be selected by a member of the team", {
-      as: "permissive",
-      for: "select",
-      to: ["public"],
-    }),
-    pgPolicy("Apps can be updated by a member of the team", {
-      as: "permissive",
-      for: "update",
-      to: ["public"],
-    }),
   ],
 );
 
@@ -1928,30 +1599,6 @@ export const platformIdentities = pgTable(
       table.externalTeamId,
       table.externalUserId,
     ),
-    pgPolicy("Platform identities can be created by a member of the team", {
-      as: "permissive",
-      for: "insert",
-      to: ["authenticated"],
-      withCheck: sql`(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))`,
-    }),
-    pgPolicy("Platform identities can be selected by a member of the team", {
-      as: "permissive",
-      for: "select",
-      to: ["authenticated"],
-      using: sql`(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))`,
-    }),
-    pgPolicy("Platform identities can be updated by a member of the team", {
-      as: "permissive",
-      for: "update",
-      to: ["authenticated"],
-      using: sql`(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))`,
-    }),
-    pgPolicy("Platform identities can be deleted by a member of the team", {
-      as: "permissive",
-      for: "delete",
-      to: ["authenticated"],
-      using: sql`(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))`,
-    }),
   ],
 );
 
@@ -1992,30 +1639,6 @@ export const platformLinkTokens = pgTable(
       name: "platform_link_tokens_user_id_fkey",
     }).onDelete("cascade"),
     unique("platform_link_tokens_code_unique").on(table.code),
-    pgPolicy("Platform link tokens can be created by a member of the team", {
-      as: "permissive",
-      for: "insert",
-      to: ["authenticated"],
-      withCheck: sql`(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))`,
-    }),
-    pgPolicy("Platform link tokens can be selected by a member of the team", {
-      as: "permissive",
-      for: "select",
-      to: ["authenticated"],
-      using: sql`(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))`,
-    }),
-    pgPolicy("Platform link tokens can be updated by a member of the team", {
-      as: "permissive",
-      for: "update",
-      to: ["authenticated"],
-      using: sql`(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))`,
-    }),
-    pgPolicy("Platform link tokens can be deleted by a member of the team", {
-      as: "permissive",
-      for: "delete",
-      to: ["authenticated"],
-      using: sql`(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))`,
-    }),
   ],
 );
 
@@ -2073,42 +1696,6 @@ export const providerNotificationBatches = pgTable(
       name: "provider_notification_batches_user_id_fkey",
     }).onDelete("cascade"),
     unique("provider_notification_batches_batch_key_unique").on(table.batchKey),
-    pgPolicy(
-      "Provider notification batches can be created by a member of the team",
-      {
-        as: "permissive",
-        for: "insert",
-        to: ["authenticated"],
-        withCheck: sql`(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))`,
-      },
-    ),
-    pgPolicy(
-      "Provider notification batches can be selected by a member of the team",
-      {
-        as: "permissive",
-        for: "select",
-        to: ["authenticated"],
-        using: sql`(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))`,
-      },
-    ),
-    pgPolicy(
-      "Provider notification batches can be updated by a member of the team",
-      {
-        as: "permissive",
-        for: "update",
-        to: ["authenticated"],
-        using: sql`(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))`,
-      },
-    ),
-    pgPolicy(
-      "Provider notification batches can be deleted by a member of the team",
-      {
-        as: "permissive",
-        for: "delete",
-        to: ["authenticated"],
-        using: sql`(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))`,
-      },
-    ),
   ],
 );
 
@@ -2175,12 +1762,6 @@ export const invoiceTemplates = pgTable(
       name: "invoice_settings_team_id_fkey",
     }).onDelete("cascade"),
     index("idx_invoice_templates_team_id").on(table.teamId),
-    pgPolicy("Invoice templates can be handled by a member of the team", {
-      as: "permissive",
-      for: "all",
-      to: ["public"],
-      using: sql`(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))`,
-    }),
   ],
 );
 
@@ -2249,30 +1830,6 @@ export const invoiceProducts = pgTable(
       table.currency,
       table.price,
     ),
-    pgPolicy("Enable read access for team members", {
-      as: "permissive",
-      for: "select",
-      to: ["public"],
-      using: sql`team_id = (select auth.jwt() ->> 'team_id')::uuid`,
-    }),
-    pgPolicy("Enable insert access for team members", {
-      as: "permissive",
-      for: "insert",
-      to: ["public"],
-      withCheck: sql`team_id = (select auth.jwt() ->> 'team_id')::uuid`,
-    }),
-    pgPolicy("Enable update access for team members", {
-      as: "permissive",
-      for: "update",
-      to: ["public"],
-      using: sql`team_id = (select auth.jwt() ->> 'team_id')::uuid`,
-    }),
-    pgPolicy("Enable delete access for team members", {
-      as: "permissive",
-      for: "delete",
-      to: ["public"],
-      using: sql`team_id = (select auth.jwt() ->> 'team_id')::uuid`,
-    }),
   ],
 );
 
@@ -2308,19 +1865,140 @@ export const transactionEnrichments = pgTable(
       name: "transaction_enrichments_team_id_fkey",
     }).onDelete("cascade"),
     unique("unique_team_name").on(table.name, table.teamId),
-    pgPolicy("Enable insert for authenticated users only", {
-      as: "permissive",
-      for: "insert",
-      to: ["authenticated"],
-      withCheck: sql`true`,
-    }),
-    pgPolicy("Enable update for authenticated users only", {
-      as: "permissive",
-      for: "update",
-      to: ["authenticated"],
-    }),
   ],
 );
+
+export const authUsers = pgTable("auth_users", {
+  id: uuid("id").default(sql`pg_catalog.gen_random_uuid()`).primaryKey(),
+  name: text("name").default("").notNull(),
+  email: text("email").notNull().unique(),
+  emailVerified: boolean("email_verified").default(false).notNull(),
+  image: text("image"),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .defaultNow()
+    .$onUpdate(() => new Date())
+    .notNull(),
+  twoFactorEnabled: boolean("two_factor_enabled").default(false),
+});
+
+export const authSessions = pgTable(
+  "auth_sessions",
+  {
+    id: uuid("id").default(sql`pg_catalog.gen_random_uuid()`).primaryKey(),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    token: text("token").notNull().unique(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .$onUpdate(() => new Date())
+      .notNull(),
+    ipAddress: text("ip_address"),
+    userAgent: text("user_agent"),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => authUsers.id, { onDelete: "cascade" }),
+    aal: text("aal").default("aal1").notNull(),
+  },
+  (table) => [index("session_userId_idx").on(table.userId)],
+);
+
+export const authAccounts = pgTable(
+  "auth_accounts",
+  {
+    id: uuid("id").default(sql`pg_catalog.gen_random_uuid()`).primaryKey(),
+    accountId: text("account_id").notNull(),
+    providerId: text("provider_id").notNull(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => authUsers.id, { onDelete: "cascade" }),
+    accessToken: text("access_token"),
+    refreshToken: text("refresh_token"),
+    idToken: text("id_token"),
+    accessTokenExpiresAt: timestamp("access_token_expires_at", {
+      withTimezone: true,
+    }),
+    refreshTokenExpiresAt: timestamp("refresh_token_expires_at", {
+      withTimezone: true,
+    }),
+    scope: text("scope"),
+    password: text("password"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .$onUpdate(() => new Date())
+      .notNull(),
+  },
+  (table) => [
+    index("account_userId_idx").on(table.userId),
+    uniqueIndex("auth_accounts_provider_account_key").on(
+      table.providerId,
+      table.accountId,
+    ),
+  ],
+);
+
+export const authVerifications = pgTable(
+  "auth_verifications",
+  {
+    id: uuid("id").default(sql`pg_catalog.gen_random_uuid()`).primaryKey(),
+    identifier: text("identifier").notNull(),
+    value: text("value").notNull(),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .$onUpdate(() => new Date())
+      .notNull(),
+  },
+  (table) => [index("verification_identifier_idx").on(table.identifier)],
+);
+
+export const authJwks = pgTable("auth_jwks", {
+  id: uuid("id").default(sql`pg_catalog.gen_random_uuid()`).primaryKey(),
+  publicKey: text("public_key").notNull(),
+  privateKey: text("private_key").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+  expiresAt: timestamp("expires_at", { withTimezone: true }),
+  alg: text("alg"),
+  crv: text("crv"),
+});
+
+export const authTwoFactors = pgTable(
+  "auth_two_factors",
+  {
+    id: uuid("id").default(sql`pg_catalog.gen_random_uuid()`).primaryKey(),
+    secret: text("secret").notNull(),
+    backupCodes: text("backup_codes").notNull(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => authUsers.id, { onDelete: "cascade" }),
+    verified: boolean("verified").default(true),
+    failedVerificationCount: integer("failed_verification_count").default(0),
+    lockedUntil: timestamp("locked_until", { withTimezone: true }),
+  },
+  (table) => [
+    index("twoFactor_secret_idx").on(table.secret),
+    uniqueIndex("auth_two_factors_user_id_key").on(table.userId),
+  ],
+);
+
+export const authRateLimits = pgTable("auth_rate_limits", {
+  id: uuid("id").default(sql`pg_catalog.gen_random_uuid()`).primaryKey(),
+  key: text("key").notNull().unique(),
+  count: integer("count").notNull(),
+  lastRequest: bigint("last_request", { mode: "number" }).notNull(),
+});
 
 export const users = pgTable(
   "users",
@@ -2342,41 +2020,20 @@ export const users = pgTable(
     dateFormat: text("date_format"),
   },
   (table) => [
+    foreignKey({
+      columns: [table.id],
+      foreignColumns: [authUsers.id],
+      name: "users_id_fkey",
+    }).onDelete("cascade"),
     index("users_team_id_idx").using(
       "btree",
       table.teamId.asc().nullsLast().op("uuid_ops"),
     ),
     foreignKey({
-      columns: [table.id],
-      foreignColumns: [table.id],
-      name: "users_id_fkey",
-    }).onDelete("cascade"),
-    foreignKey({
       columns: [table.teamId],
       foreignColumns: [teams.id],
       name: "users_team_id_fkey",
     }).onDelete("set null"),
-    pgPolicy("Users can insert their own profile.", {
-      as: "permissive",
-      for: "insert",
-      to: ["public"],
-      withCheck: sql`(auth.uid() = id)`,
-    }),
-    pgPolicy("Users can select their own profile.", {
-      as: "permissive",
-      for: "select",
-      to: ["public"],
-    }),
-    pgPolicy("Users can select users if they are in the same team", {
-      as: "permissive",
-      for: "select",
-      to: ["authenticated"],
-    }),
-    pgPolicy("Users can update own profile.", {
-      as: "permissive",
-      for: "update",
-      to: ["public"],
-    }),
   ],
 );
 
@@ -2429,27 +2086,6 @@ export const trackerProjects = pgTable(
       foreignColumns: [teams.id],
       name: "tracker_projects_team_id_fkey",
     }).onDelete("cascade"),
-    pgPolicy("Projects can be created by a member of the team", {
-      as: "permissive",
-      for: "insert",
-      to: ["authenticated"],
-      withCheck: sql`(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))`,
-    }),
-    pgPolicy("Projects can be deleted by a member of the team", {
-      as: "permissive",
-      for: "delete",
-      to: ["authenticated"],
-    }),
-    pgPolicy("Projects can be selected by a member of the team", {
-      as: "permissive",
-      for: "select",
-      to: ["authenticated"],
-    }),
-    pgPolicy("Projects can be updated by a member of the team", {
-      as: "permissive",
-      for: "update",
-      to: ["authenticated"],
-    }),
   ],
 );
 
@@ -2557,22 +2193,6 @@ export const inbox = pgTable(
     // Note: groupedInboxId self-referential foreign key constraint is defined in migration
     // to avoid TypeScript circular reference error (inbox.id referenced before inbox is fully defined)
     unique("inbox_reference_id_key").on(table.referenceId),
-    pgPolicy("Inbox can be deleted by a member of the team", {
-      as: "permissive",
-      for: "delete",
-      to: ["public"],
-      using: sql`(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))`,
-    }),
-    pgPolicy("Inbox can be selected by a member of the team", {
-      as: "permissive",
-      for: "select",
-      to: ["public"],
-    }),
-    pgPolicy("Inbox can be updated by a member of the team", {
-      as: "permissive",
-      for: "update",
-      to: ["public"],
-    }),
   ],
 );
 
@@ -2598,24 +2218,6 @@ export const inboxBlocklist = pgTable(
       table.type,
       table.value,
     ),
-    pgPolicy("Inbox blocklist can be deleted by a member of the team", {
-      as: "permissive",
-      for: "delete",
-      to: ["public"],
-      using: sql`(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))`,
-    }),
-    pgPolicy("Inbox blocklist can be inserted by a member of the team", {
-      as: "permissive",
-      for: "insert",
-      to: ["public"],
-      withCheck: sql`(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))`,
-    }),
-    pgPolicy("Inbox blocklist can be selected by a member of the team", {
-      as: "permissive",
-      for: "select",
-      to: ["public"],
-      using: sql`(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))`,
-    }),
   ],
 );
 
@@ -2753,12 +2355,6 @@ export const documentTagAssignments = pgTable(
       name: "document_tag_assignments_pkey",
     }),
     unique("document_tag_assignments_unique").on(table.documentId, table.tagId),
-    pgPolicy("Tags can be handled by a member of the team", {
-      as: "permissive",
-      for: "all",
-      to: ["public"],
-      using: sql`(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))`,
-    }),
   ],
 );
 
@@ -2798,27 +2394,6 @@ export const usersOnTeam = pgTable(
     primaryKey({
       columns: [table.userId, table.teamId, table.id],
       name: "members_pkey",
-    }),
-    pgPolicy("Enable insert for authenticated users only", {
-      as: "permissive",
-      for: "insert",
-      to: ["authenticated"],
-      withCheck: sql`true`,
-    }),
-    pgPolicy("Enable updates for users on team", {
-      as: "permissive",
-      for: "update",
-      to: ["authenticated"],
-    }),
-    pgPolicy("Select for current user teams", {
-      as: "permissive",
-      for: "select",
-      to: ["authenticated"],
-    }),
-    pgPolicy("Users on team can be deleted by a member of the team", {
-      as: "permissive",
-      for: "delete",
-      to: ["public"],
     }),
   ],
 );
@@ -2867,95 +2442,6 @@ export const transactionCategories = pgTable(
       name: "transaction_categories_pkey",
     }),
     unique("unique_team_slug").on(table.teamId, table.slug),
-    pgPolicy("Users on team can manage categories", {
-      as: "permissive",
-      for: "all",
-      to: ["public"],
-      using: sql`(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))`,
-    }),
-  ],
-);
-
-export const usersInAuth = pgTable(
-  "auth.users",
-  {
-    instanceId: uuid("instance_id"),
-    id: uuid("id").notNull(),
-    aud: varchar("aud", { length: 255 }),
-    role: varchar("role", { length: 255 }),
-    email: varchar("email", { length: 255 }),
-    encryptedPassword: varchar("encrypted_password", { length: 255 }),
-    emailConfirmedAt: timestamp("email_confirmed_at", { withTimezone: true }),
-    invitedAt: timestamp("invited_at", { withTimezone: true }),
-    confirmationToken: varchar("confirmation_token", { length: 255 }),
-    confirmationSentAt: timestamp("confirmation_sent_at", {
-      withTimezone: true,
-    }),
-    recoveryToken: varchar("recovery_token", { length: 255 }),
-    recoverySentAt: timestamp("recovery_sent_at", { withTimezone: true }),
-    emailChangeTokenNew: varchar("email_change_token_new", { length: 255 }),
-    emailChange: varchar("email_change", { length: 255 }),
-    emailChangeSentAt: timestamp("email_change_sent_at", {
-      withTimezone: true,
-    }),
-    lastSignInAt: timestamp("last_sign_in_at", { withTimezone: true }),
-    rawAppMetaData: jsonb("raw_app_meta_data"),
-    rawUserMetaData: jsonb("raw_user_meta_data"),
-    isSuperAdmin: boolean("is_super_admin"),
-    createdAt: timestamp("created_at", { withTimezone: true }),
-    updatedAt: timestamp("updated_at", { withTimezone: true }),
-    phone: text("phone").default(sql`null::character varying`),
-    phoneConfirmedAt: timestamp("phone_confirmed_at", { withTimezone: true }),
-    phoneChange: text("phone_change").default(sql`''::character varying`),
-    phoneChangeToken: varchar("phone_change_token", { length: 255 }).default(
-      sql`''::character varying`,
-    ),
-    phoneChangeSentAt: timestamp("phone_change_sent_at", {
-      withTimezone: true,
-    }),
-    // Drizzle ORM does not support .stored() for generated columns, so we omit it
-    confirmedAt: timestamp("confirmed_at", {
-      withTimezone: true,
-      mode: "string",
-    }).generatedAlwaysAs(sql`LEAST(email_confirmed_at, phone_confirmed_at)`),
-    emailChangeTokenCurrent: varchar("email_change_token_current", {
-      length: 255,
-    }).default(sql`''::character varying`),
-    emailChangeConfirmStatus: smallint("email_change_confirm_status").default(
-      0,
-    ),
-    bannedUntil: timestamp("banned_until", { withTimezone: true }),
-    reauthenticationToken: varchar("reauthentication_token", {
-      length: 255,
-    }).default(sql`''::character varying`),
-    reauthenticationSentAt: timestamp("reauthentication_sent_at", {
-      withTimezone: true,
-    }),
-    isSsoUser: boolean("is_sso_user").notNull().default(false),
-    deletedAt: timestamp("deleted_at", { withTimezone: true }),
-    isAnonymous: boolean("is_anonymous").notNull().default(false),
-  },
-  (table) => [
-    primaryKey({ columns: [table.id], name: "users_pkey" }),
-    unique("users_phone_key").on(table.phone),
-    unique("confirmation_token_idx").on(table.confirmationToken),
-    unique("email_change_token_current_idx").on(table.emailChangeTokenCurrent),
-    unique("email_change_token_new_idx").on(table.emailChangeTokenNew),
-    unique("reauthentication_token_idx").on(table.reauthenticationToken),
-    unique("recovery_token_idx").on(table.recoveryToken),
-    unique("users_email_partial_key").on(table.email),
-    index("users_instance_id_email_idx").on(
-      table.instanceId,
-      sql`lower((email)::text)`,
-    ),
-    index("users_instance_id_idx").on(table.instanceId),
-    index("users_is_anonymous_idx").on(table.isAnonymous),
-    // Check constraint for email_change_confirm_status
-    {
-      kind: "check",
-      name: "users_email_change_confirm_status_check",
-      expression: sql`((email_change_confirm_status >= 0) AND (email_change_confirm_status <= 2))`,
-    },
   ],
 );
 
@@ -2965,6 +2451,8 @@ export const shortLinks = pgTable(
     id: uuid().defaultRandom().primaryKey().notNull(),
     shortId: text("short_id").notNull(),
     url: text().notNull(),
+    bucket: text(),
+    objectKey: text("object_key"),
     type: text("type"),
     size: numericCasted("size", { precision: 10, scale: 2 }),
     mimeType: text("mime_type"),
@@ -3000,30 +2488,6 @@ export const shortLinks = pgTable(
       name: "short_links_team_id_fkey",
     }).onDelete("cascade"),
     unique("short_links_short_id_unique").on(table.shortId),
-    pgPolicy("Short links can be created by a member of the team", {
-      as: "permissive",
-      for: "insert",
-      to: ["authenticated"],
-      withCheck: sql`(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))`,
-    }),
-    pgPolicy("Short links can be selected by a member of the team", {
-      as: "permissive",
-      for: "select",
-      to: ["authenticated"],
-      using: sql`(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))`,
-    }),
-    pgPolicy("Short links can be updated by a member of the team", {
-      as: "permissive",
-      for: "update",
-      to: ["authenticated"],
-      using: sql`(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))`,
-    }),
-    pgPolicy("Short links can be deleted by a member of the team", {
-      as: "permissive",
-      for: "delete",
-      to: ["authenticated"],
-      using: sql`(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))`,
-    }),
   ],
 );
 
@@ -3128,12 +2592,6 @@ export const oauthApplications = pgTable(
       foreignColumns: [users.id],
       name: "oauth_applications_created_by_fkey",
     }).onDelete("cascade"),
-    pgPolicy("OAuth applications can be managed by team members", {
-      as: "permissive",
-      for: "all",
-      to: ["public"],
-      using: sql`(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))`,
-    }),
   ],
 );
 
@@ -3294,10 +2752,6 @@ export const usersRelations = relations(users, ({ one, many }) => ({
   oauthApplications: many(oauthApplications),
   oauthAuthorizationCodes: many(oauthAuthorizationCodes),
   oauthAccessTokens: many(oauthAccessTokens),
-  usersInAuth: one(usersInAuth, {
-    fields: [users.id],
-    references: [usersInAuth.id],
-  }),
   team: one(teams, {
     fields: [users.teamId],
     references: [teams.id],
@@ -3678,10 +3132,6 @@ export const transactionEnrichmentsRelations = relations(
   }),
 );
 
-export const usersInAuthRelations = relations(usersInAuth, ({ many }) => ({
-  users: many(users),
-}));
-
 export const inboxRelations = relations(inbox, ({ one }) => ({
   transactionAttachment: one(transactionAttachments, {
     fields: [inbox.attachmentId],
@@ -3889,12 +3339,6 @@ export const notificationSettings = pgTable(
       foreignColumns: [teams.id],
       name: "notification_settings_team_id_fkey",
     }).onDelete("cascade"),
-    pgPolicy("Users can manage their own notification settings", {
-      as: "permissive",
-      for: "all",
-      to: ["public"],
-      using: sql`(user_id = auth.uid())`,
-    }),
   ],
 );
 
@@ -3955,22 +3399,6 @@ export const accountingSyncRecords = pgTable(
       foreignColumns: [teams.id],
       name: "accounting_sync_records_team_id_fkey",
     }).onDelete("cascade"),
-    pgPolicy("Team members can view their sync records", {
-      as: "permissive",
-      for: "select",
-      to: ["public"],
-    }),
-    pgPolicy("Team members can insert sync records", {
-      as: "permissive",
-      for: "insert",
-      to: ["public"],
-      withCheck: sql`(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))`,
-    }),
-    pgPolicy("Team members can update sync records", {
-      as: "permissive",
-      for: "update",
-      to: ["public"],
-    }),
   ],
 );
 
@@ -4153,11 +3581,6 @@ export const insights = pgTable(
       table.periodType,
       table.generatedAt.desc(),
     ),
-    pgPolicy("Team members can view their insights", {
-      as: "permissive",
-      for: "select",
-      to: ["public"],
-    }),
   ],
 );
 
@@ -4192,11 +3615,6 @@ export const insightUserStatus = pgTable(
     primaryKey({ columns: [table.insightId, table.userId] }),
     index("insight_user_status_user_idx").on(table.userId),
     index("insight_user_status_insight_idx").on(table.insightId),
-    pgPolicy("Users can manage their own insight status", {
-      as: "permissive",
-      for: "all",
-      to: ["public"],
-    }),
   ],
 );
 

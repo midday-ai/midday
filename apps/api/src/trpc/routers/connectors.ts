@@ -1,8 +1,8 @@
 import { getCatalog } from "@api/composio/catalog";
 import {
-  composio,
   composioFetch,
   extractActiveConnections,
+  getComposio,
   getUserToolkits,
   invalidateUserToolkitsCache,
   type ToolkitDetail,
@@ -74,7 +74,7 @@ export const connectorsRouter = createTRPCRouter({
         });
       }
 
-      const composioSession = await composio.create(userId);
+      const composioSession = await getComposio().create(userId);
       const request = await composioSession.authorize(input.toolkit, {
         callbackUrl: input.callbackUrl,
       });
@@ -89,7 +89,7 @@ export const connectorsRouter = createTRPCRouter({
     .mutation(async ({ ctx: { session }, input }) => {
       const userId = session.user.id;
 
-      const { items } = await composio.connectedAccounts.list({
+      const { items } = await getComposio().connectedAccounts.list({
         userIds: [userId],
       });
 
@@ -102,7 +102,7 @@ export const connectorsRouter = createTRPCRouter({
         });
       }
 
-      await composio.connectedAccounts.delete(input.connectedAccountId);
+      await getComposio().connectedAccounts.delete(input.connectedAccountId);
       await invalidateUserToolkitsCache(userId);
       return { success: true };
     }),

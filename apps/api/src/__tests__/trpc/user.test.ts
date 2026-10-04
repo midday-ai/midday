@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, test } from "bun:test";
+import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 import { getUserInvites } from "@midday/db/queries";
 import { createCallerFactory } from "../../trpc/init";
 import { userRouter } from "../../trpc/routers/user";
@@ -193,14 +193,21 @@ describe("tRPC: user.switchTeam", () => {
 });
 
 describe("tRPC: user.delete", () => {
+  const originalProvider = process.env.NEXT_PUBLIC_BACKEND_PROVIDER;
+  afterEach(() => {
+    if (originalProvider === undefined)
+      delete process.env.NEXT_PUBLIC_BACKEND_PROVIDER;
+    else process.env.NEXT_PUBLIC_BACKEND_PROVIDER = originalProvider;
+  });
   beforeEach(() => {
-    mocks.deleteUser.mockReset();
-    mocks.deleteUser.mockImplementation(() =>
-      Promise.resolve({ id: "test-user-id" }),
-    );
+    delete process.env.NEXT_PUBLIC_BACKEND_PROVIDER;
     mocks.supabaseAdminDeleteUser.mockReset();
     mocks.supabaseAdminDeleteUser.mockImplementation(() =>
       Promise.resolve({ data: {}, error: null }),
+    );
+    mocks.deleteUser.mockReset();
+    mocks.deleteUser.mockImplementation(() =>
+      Promise.resolve({ id: "test-user-id" }),
     );
     mocks.resendContactsRemove.mockReset();
     mocks.resendContactsRemove.mockImplementation(() =>
@@ -209,6 +216,10 @@ describe("tRPC: user.delete", () => {
   });
 
   test("deletes user and calls deleteUser", async () => {
+    const oldKey = process.env.RESEND_API_KEY;
+    const oldAudience = process.env.RESEND_AUDIENCE_ID;
+    process.env.RESEND_API_KEY = "local-test";
+    process.env.RESEND_AUDIENCE_ID = "local-audience";
     const caller = createCaller(createTestContext());
     const result = await caller.delete();
 
@@ -224,5 +235,23 @@ describe("tRPC: user.delete", () => {
         audienceId: process.env.RESEND_AUDIENCE_ID,
       }),
     );
+    if (oldKey === undefined) delete process.env.RESEND_API_KEY;
+    else process.env.RESEND_API_KEY = oldKey;
+    if (oldAudience === undefined) delete process.env.RESEND_AUDIENCE_ID;
+    else process.env.RESEND_AUDIENCE_ID = oldAudience;
+  });
+  test("deletes locally without contacting Supabase or an unconfigured email service", async () => {
+    process.env.NEXT_PUBLIC_BACKEND_PROVIDER = "local";
+    const oldKey = process.env.RESEND_API_KEY;
+    delete process.env.RESEND_API_KEY;
+    try {
+      expect(await createCaller(createTestContext()).delete()).toMatchObject({
+        id: "test-user-id",
+      });
+      expect(mocks.resendContactsRemove).not.toHaveBeenCalled();
+      expect(mocks.supabaseAdminDeleteUser).not.toHaveBeenCalled();
+    } finally {
+      if (oldKey !== undefined) process.env.RESEND_API_KEY = oldKey;
+    }
   });
 });

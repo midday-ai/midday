@@ -1,7 +1,9 @@
 import { createClient } from "@midday/supabase/server";
 import { Skeleton } from "@midday/ui/skeleton";
+import { isLocalBackend } from "@midday/utils/backend";
 import { format } from "date-fns";
 import { getI18n } from "@/locales/server";
+import { LocalMFAList } from "./mfa-list.local";
 import { RemoveMFAButton } from "./remove-mfa-button";
 
 export function MFAListSkeleton() {
@@ -12,7 +14,7 @@ export function MFAListSkeleton() {
   );
 }
 
-export async function MFAList() {
+async function SupabaseMFAList() {
   const supabase = await createClient();
 
   const { data } = await supabase.auth.mfa.listFactors();
@@ -40,4 +42,8 @@ export async function MFAList() {
         </div>
       );
     });
+}
+
+export async function MFAList() {
+  return isLocalBackend() ? <LocalMFAList /> : <SupabaseMFAList />;
 }

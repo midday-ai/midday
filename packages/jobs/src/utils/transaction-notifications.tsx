@@ -1,5 +1,5 @@
+import { getDb } from "@jobs/init";
 import { sendSlackTransactionNotifications } from "@midday/app-store/slack-notifications";
-import { createClient } from "@midday/supabase/job";
 
 interface Transaction {
   id: string;
@@ -15,8 +15,6 @@ export async function handleTransactionSlackNotifications(
   teamId: string,
   transactions: Transaction[],
 ) {
-  const supabase = createClient();
-
   // TODO: Get correct locale for formatting the amount
   const slackTransactions = transactions.map((transaction) => ({
     amount: Intl.NumberFormat("en-US", {
@@ -29,6 +27,6 @@ export async function handleTransactionSlackNotifications(
   await sendSlackTransactionNotifications({
     teamId,
     transactions: slackTransactions,
-    supabase: supabase as any,
+    db: getDb(),
   });
 }

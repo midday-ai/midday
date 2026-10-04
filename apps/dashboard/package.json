@@ -11,7 +11,7 @@
     "format": "biome format --write .",
     "start": "next start",
     "typecheck": "tsc --noEmit",
-    "test": "find src -name '*.test.ts' -o -name '*.spec.ts' | grep -q . && bun test --exit src || echo 'No tests yet'"
+    "test": "bun test --exit src image-loader.test.ts"
   },
   "dependencies": {
     "@ai-sdk/openai": "catalog:",
@@ -83,11 +83,15 @@
     "server-only": "^0.0.1",
     "streamdown": "^2.5.0",
     "tippy.js": "^6.3.7",
-    "tus-js-client": "4.3.1",
     "use-places-autocomplete": "^4.0.1",
     "usehooks-ts": "^3.1.1",
     "zod": "catalog:",
-    "zustand": "^5.0.12"
+    "zustand": "^5.0.12",
+    "@midday/auth": "workspace:*",
+    "@midday/db": "workspace:*",
+    "better-auth": "1.7.7",
+    "@midday/storage": "workspace:*",
+    "tus-js-client": "4.3.1"
   },
   "devDependencies": {
     "@midday/tsconfig": "workspace:*",

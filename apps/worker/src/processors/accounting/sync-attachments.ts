@@ -14,7 +14,8 @@ import {
   getTransactionAttachmentsForSync,
   updateSyncedAttachmentMapping,
 } from "@midday/db/queries";
-import { createClient } from "@midday/supabase/job";
+import { download } from "@midday/storage";
+import { assertTeamKey } from "@midday/storage/keys";
 import type { Job } from "bullmq";
 import type { AccountingAttachmentSyncPayload } from "../../schemas/accounting";
 import { AccountingProcessorBase, type AccountingProviderId } from "./base";
@@ -72,8 +73,6 @@ export class SyncAttachmentsProcessor extends AccountingProcessorBase<Accounting
       note,
       addHistoryNote,
     } = job.data;
-
-    const supabase = createClient(); // Only for storage access (unavoidable)
 
     this.logger.info("Starting attachment sync", {
       teamId,
@@ -200,7 +199,7 @@ export class SyncAttachmentsProcessor extends AccountingProcessorBase<Accounting
         async (attachment) => {
           return uploadAttachment(
             attachment,
-            supabase,
+            teamId,
             provider,
             orgId,
             providerTransactionId,
@@ -368,7 +367,7 @@ export class SyncAttachmentsProcessor extends AccountingProcessorBase<Accounting
       path: string[] | null;
       type: string | null;
     },
-    supabase: ReturnType<typeof createClient>,
+    teamId: string,
     provider: AccountingProvider,
     orgId: string,
     providerTransactionId: string,
@@ -399,21 +398,19 @@ export class SyncAttachmentsProcessor extends AccountingProcessorBase<Accounting
       ? attachment.path.join("/")
       : attachment.path;
 
-    const { data: fileData, error: downloadError } = await supabase.storage
-      .from("vault")
-      .download(filePath);
+    const fileData = await download("vault", assertTeamKey(teamId, filePath));
 
-    if (downloadError || !fileData) {
+    if (!fileData) {
       this.logger.error("Failed to download attachment", {
         attachmentId: attachment.id,
         path: filePath,
-        error: downloadError?.message,
+        error: "File not found",
       });
       return {
         success: false,
         attachmentId: attachment.id,
         providerAttachmentId: null,
-        error: `Download failed: ${downloadError?.message}`,
+        error: `Download failed: ${"File not found"}`,
       };
     }
 

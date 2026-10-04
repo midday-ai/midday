@@ -1,7 +1,27 @@
-import { eq } from "drizzle-orm";
+import { isLocalBackend } from "@midday/utils/backend";
+import { eq, sql } from "drizzle-orm";
+import { pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
 import { nanoid } from "nanoid";
 import type { Database } from "../client";
-import { shortLinks, teams } from "../schema";
+import { numericCasted, shortLinks, teams } from "../schema";
+
+// Existing Supabase schemas do not have the local object-reference columns.
+// A separate query-only projection also keeps Drizzle INSERT from emitting them as DEFAULT.
+const legacyShortLinks = pgTable("short_links", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  shortId: text("short_id").notNull(),
+  url: text("url").notNull(),
+  type: text("type"),
+  size: numericCasted("size", { precision: 10, scale: 2 }),
+  mimeType: text("mime_type"),
+  fileName: text("file_name"),
+  teamId: uuid("team_id").notNull(),
+  userId: uuid("user_id").notNull(),
+  expiresAt: timestamp("expires_at", { withTimezone: true, mode: "string" }),
+  createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })
+    .defaultNow()
+    .notNull(),
+});
 
 export type ShortLink = {
   id: string;
@@ -13,11 +33,14 @@ export type ShortLink = {
 };
 
 export async function getShortLinkByShortId(db: Database, shortId: string) {
+  const local = isLocalBackend();
   const [result] = await db
     .select({
       id: shortLinks.id,
       shortId: shortLinks.shortId,
       url: shortLinks.url,
+      bucket: local ? shortLinks.bucket : sql<string | null>`null`,
+      objectKey: local ? shortLinks.objectKey : sql<string | null>`null`,
       teamId: shortLinks.teamId,
       userId: shortLinks.userId,
       createdAt: shortLinks.createdAt,
@@ -38,6 +61,8 @@ export async function getShortLinkByShortId(db: Database, shortId: string) {
 
 type CreateShortLinkData = {
   url: string;
+  bucket?: "vault" | "avatars" | "apps";
+  objectKey?: string;
   teamId: string;
   userId: string;
   type: "redirect" | "download";
@@ -49,12 +74,15 @@ type CreateShortLinkData = {
 
 export async function createShortLink(db: Database, data: CreateShortLinkData) {
   const shortId = nanoid(21);
+  const local = isLocalBackend();
+  const table = local ? shortLinks : legacyShortLinks;
 
   const [result] = await db
-    .insert(shortLinks)
+    .insert(table)
     .values({
       shortId,
       url: data.url,
+      ...(local ? { bucket: data.bucket, objectKey: data.objectKey } : {}),
       teamId: data.teamId,
       userId: data.userId,
       type: data.type,
@@ -64,15 +92,17 @@ export async function createShortLink(db: Database, data: CreateShortLinkData) {
       expiresAt: data.expiresAt,
     })
     .returning({
-      id: shortLinks.id,
-      shortId: shortLinks.shortId,
-      url: shortLinks.url,
-      type: shortLinks.type,
-      fileName: shortLinks.fileName,
-      mimeType: shortLinks.mimeType,
-      size: shortLinks.size,
-      createdAt: shortLinks.createdAt,
-      expiresAt: shortLinks.expiresAt,
+      id: table.id,
+      shortId: table.shortId,
+      url: table.url,
+      bucket: local ? shortLinks.bucket : sql<string | null>`null`,
+      objectKey: local ? shortLinks.objectKey : sql<string | null>`null`,
+      type: table.type,
+      fileName: table.fileName,
+      mimeType: table.mimeType,
+      size: table.size,
+      createdAt: table.createdAt,
+      expiresAt: table.expiresAt,
     });
 
   return result;

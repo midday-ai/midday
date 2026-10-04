@@ -1,26 +1,16 @@
-import type { Database } from "@midday/supabase/types";
+import type { bankAccounts, transactions } from "@midday/db/schema";
+import { transactionMethodsEnum } from "@midday/db/schema";
 
-type TransformTransactionData = {
-  transaction: Database["public"]["Tables"]["transactions"]["Row"];
-  teamId: string;
-  bankAccountId: string;
-  notified?: boolean;
-};
-
-type Transaction = {
+type ProviderTransaction = {
+  id: string;
   name: string;
-  internal_id: string;
-  category_slug: string | null;
-  bank_account_id: string;
   description: string | null;
-  balance: number | null;
+  date: string;
+  amount: number;
   currency: string;
   method: string | null;
-  amount: number;
-  team_id: string;
-  date: string;
-  status: "posted";
-  notified?: boolean;
+  category: string | null;
+  balance: number | null;
   counterparty_name: string | null;
   merchant_name: string | null;
 };
@@ -30,36 +20,36 @@ export function transformTransaction({
   teamId,
   bankAccountId,
   notified,
-}: TransformTransactionData): Transaction {
+}: {
+  transaction: ProviderTransaction;
+  teamId: string;
+  bankAccountId: string;
+  notified?: boolean;
+}): typeof transactions.$inferInsert {
+  const method =
+    transactionMethodsEnum.enumValues.find(
+      (value) => value === transaction.method,
+    ) ?? "unknown";
   return {
     name: transaction.name,
     description: transaction.description,
     date: transaction.date,
     amount: transaction.amount,
     currency: transaction.currency,
-    method: transaction.method,
-    internal_id: `${teamId}_${transaction.id}`,
-    category_slug: transaction.category,
-    bank_account_id: bankAccountId,
+    method,
+    internalId: `${teamId}_${transaction.id}`,
+    categorySlug: transaction.category,
+    bankAccountId,
     balance: transaction.balance,
-    team_id: teamId,
-    counterparty_name: transaction.counterparty_name,
-    merchant_name: transaction.merchant_name,
-    // We only support posted transactions for now
+    teamId,
+    counterpartyName: transaction.counterparty_name,
+    merchantName: transaction.merchant_name,
     status: "posted",
-    // If the transactions are being synced manually, we don't want to notify
-    // And using upsert, we don't want to override the notified value
+    // Preserve existing notified values when a sync is not explicitly manual.
     ...(notified ? { notified } : {}),
   };
 }
 
-export function getClassification(
-  type: Database["public"]["Enums"]["account_type"],
-) {
-  switch (type) {
-    case "credit":
-      return "credit";
-    default:
-      return "depository";
-  }
+export function getClassification(type: typeof bankAccounts.$inferSelect.type) {
+  return type === "credit" ? "credit" : "depository";
 }

@@ -9,7 +9,6 @@ import {
   CardTitle,
 } from "@midday/ui/card";
 import { Spinner } from "@midday/ui/spinner";
-import { stripSpecialCharacters } from "@midday/utils";
 import { useRef } from "react";
 import { useTeamMutation, useTeamQuery } from "@/hooks/use-team";
 import { useUpload } from "@/hooks/use-upload";
@@ -24,11 +23,9 @@ export function CompanyLogo() {
     const { files } = evt.target;
     const selectedFile = files as FileList;
 
-    const filename = stripSpecialCharacters(selectedFile[0]?.name ?? "");
-
     const { url } = await uploadFile({
       bucket: "avatars",
-      path: [data?.id ?? "", filename],
+      path: [data?.id ?? ""],
       file: selectedFile[0] as File,
     });
 

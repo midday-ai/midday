@@ -92,3 +92,7 @@ dist-ssr
 
 # Toolpick embedding cache (auto-generated on first boot)
 .toolpick-cache.json
+
+# Browser test artifacts
+/test-results/
+playwright-report/

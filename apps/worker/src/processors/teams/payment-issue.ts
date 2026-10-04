@@ -5,8 +5,6 @@ import { Resend } from "resend";
 import type { PaymentIssuePayload } from "../../schemas/teams";
 import { BaseProcessor } from "../base";
 
-const resend = new Resend(process.env.RESEND_API_KEY!);
-
 export class PaymentIssueProcessor extends BaseProcessor<PaymentIssuePayload> {
   async process(job: Job<PaymentIssuePayload>): Promise<void> {
     const { teamId, email, fullName, teamName } = job.data;
@@ -19,6 +17,7 @@ export class PaymentIssueProcessor extends BaseProcessor<PaymentIssuePayload> {
 
     const html = await render(PaymentIssueEmail({ fullName, teamName }));
 
+    const resend = new Resend(process.env.RESEND_API_KEY);
     await resend.emails.send({
       from: "Middaybot <middaybot@midday.ai>",
       replyTo: "pontus@midday.ai",

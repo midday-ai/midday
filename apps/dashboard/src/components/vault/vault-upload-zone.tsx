@@ -1,16 +1,15 @@
 "use client";
 
 import { LogEvents } from "@midday/events/events";
-import { createClient } from "@midday/supabase/client";
 import { cn } from "@midday/ui/cn";
 import { useToast } from "@midday/ui/use-toast";
 import { useOpenPanel } from "@openpanel/nextjs";
 import { useMutation } from "@tanstack/react-query";
 import { type ReactNode, useEffect, useRef, useState } from "react";
 import { type FileRejection, useDropzone } from "react-dropzone";
+import { useResumableUpload } from "@/hooks/use-resumable-upload";
 import { useUserQuery } from "@/hooks/use-user";
 import { useTRPC } from "@/trpc/client";
-import { resumableUpload } from "@/utils/upload";
 
 type UploadResult = {
   filename: string;
@@ -32,7 +31,7 @@ export function VaultUploadZone({ onUpload, children }: Props) {
   const trpc = useTRPC();
   const { data: user } = useUserQuery();
   const { track } = useOpenPanel();
-  const supabase = createClient();
+  const { resumableUpload } = useResumableUpload();
   const [progress, setProgress] = useState(0);
   const [showProgress, setShowProgress] = useState(false);
   const [toastId, setToastId] = useState<string | null>(null);
@@ -81,7 +80,7 @@ export function VaultUploadZone({ onUpload, children }: Props) {
     try {
       const results = (await Promise.all(
         files.map(async (file: File, idx: number) =>
-          resumableUpload(supabase, {
+          resumableUpload({
             bucket: "vault",
             path,
             file,

@@ -1,4 +1,5 @@
-import { createClient } from "@midday/supabase/job";
+import { getDb } from "@jobs/init";
+import { getBankConnections } from "@midday/db/queries";
 import { logger, schedules } from "@trigger.dev/sdk";
 import { syncConnection } from "../sync/connection";
 
@@ -11,8 +12,6 @@ export const bankSyncScheduler = schedules.task({
     // Only run in production (Set in Trigger.dev)
     if (process.env.TRIGGER_ENVIRONMENT !== "production") return;
 
-    const supabase = createClient();
-
     const teamId = payload.externalId;
 
     if (!teamId) {
@@ -20,11 +19,7 @@ export const bankSyncScheduler = schedules.task({
     }
 
     try {
-      const { data: bankConnections } = await supabase
-        .from("bank_connections")
-        .select("id")
-        .eq("team_id", teamId)
-        .throwOnError();
+      const bankConnections = await getBankConnections(getDb(), { teamId });
 
       const formattedConnections = bankConnections?.map((connection) => ({
         payload: {

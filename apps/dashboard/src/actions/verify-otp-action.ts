@@ -1,8 +1,11 @@
 "use server";
 
+import { getAuth } from "@midday/auth/server";
 import { createClient } from "@midday/supabase/server";
+import { isLocalBackend } from "@midday/utils/backend";
+import { sanitizeRedirectPath } from "@midday/utils/sanitize-redirect";
 import { addSeconds, addYears } from "date-fns";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { Cookies } from "@/utils/constants";
@@ -19,26 +22,43 @@ export const verifyOtpAction = actionClient
     }),
   )
   .action(async ({ parsedInput: { email, token, redirectTo } }) => {
-    const supabase = await createClient();
-
-    await supabase.auth.verifyOtp({
-      email,
-      token,
-      type: "email",
-    });
-
-    // Validate that the session was actually established (similar to OAuth callback)
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
-
-    if (!session) {
-      throw new Error("Failed to establish session after OTP verification");
-    }
-
-    if (isBlockedNewUser(session.user.created_at)) {
-      await supabase.auth.signOut();
-      redirect(`${getUrl()}/login?waitlist=1`);
+    if (isLocalBackend()) {
+      const auth = await getAuth();
+      const result = await auth.api.signInEmailOTP({
+        body: { email, otp: token },
+        headers: await headers(),
+      });
+      if (!result.user)
+        throw new Error("Failed to establish session after OTP verification");
+      if (isBlockedNewUser(result.user.createdAt)) {
+        const freshHeaders = new Headers(await headers());
+        freshHeaders.set(
+          "cookie",
+          (await cookies())
+            .getAll()
+            .map(({ name, value }) => `${name}=${value}`)
+            .join("; "),
+        );
+        await auth.api.signOut({ headers: freshHeaders });
+        redirect(`${getUrl()}/login?waitlist=1`);
+      }
+    } else {
+      const supabase = await createClient();
+      const { error } = await supabase.auth.verifyOtp({
+        email,
+        token,
+        type: "email",
+      });
+      if (error) throw new Error(error.message);
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      if (!session)
+        throw new Error("Failed to establish session after OTP verification");
+      if (isBlockedNewUser(session.user.created_at)) {
+        await supabase.auth.signOut();
+        redirect(`${getUrl()}/login?waitlist=1`);
+      }
     }
 
     const cookieStore = await cookies();
@@ -56,5 +76,5 @@ export const verifyOtpAction = actionClient
       sameSite: "lax",
     });
 
-    redirect(redirectTo);
+    redirect(sanitizeRedirectPath(redirectTo));
   });

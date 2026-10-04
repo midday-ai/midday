@@ -1,21 +1,20 @@
 "use client";
 
 import { LogEvents } from "@midday/events/events";
-import { createClient } from "@midday/supabase/client";
 import { useToast } from "@midday/ui/use-toast";
 import { stripSpecialCharacters } from "@midday/utils";
 import { useOpenPanel } from "@openpanel/nextjs";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useRef } from "react";
+import { useResumableUpload } from "@/hooks/use-resumable-upload";
 import { useUserQuery } from "@/hooks/use-user";
 import { useTRPC } from "@/trpc/client";
-import { resumableUpload } from "@/utils/upload";
 
 export function useInboxUpload() {
   const trpc = useTRPC();
   const { data: user } = useUserQuery();
   const { track } = useOpenPanel();
-  const supabase = createClient();
+  const { resumableUpload } = useResumableUpload();
   const queryClient = useQueryClient();
   const { toast, dismiss, update } = useToast();
   const toastIdRef = useRef<string | undefined>(undefined);
@@ -72,7 +71,7 @@ export function useInboxUpload() {
 
         const results = await Promise.all(
           files.map(async (file, idx) =>
-            resumableUpload(supabase, {
+            resumableUpload({
               bucket: "vault",
               path,
               file,
@@ -128,7 +127,7 @@ export function useInboxUpload() {
       user?.teamId,
       queryClient,
       trpc,
-      supabase,
+      resumableUpload,
       createInboxItem,
       processAttachments,
     ],

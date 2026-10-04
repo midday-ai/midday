@@ -1,6 +1,11 @@
 import { TZDate } from "@date-fns/tz";
+import { getDb } from "@jobs/init";
 import { updateInvoiceStatus } from "@jobs/utils/update-invocie";
-import { createClient } from "@midday/supabase/job";
+import {
+  createTransactionAttachment,
+  findUnfulfilledTransactionsForInvoice,
+  getInvoiceById,
+} from "@midday/db/queries";
 import { logger, schemaTask } from "@trigger.dev/sdk";
 import { subDays } from "date-fns";
 import { z } from "zod";
@@ -14,77 +19,61 @@ export const checkInvoiceStatus = schemaTask({
     concurrencyLimit: 10,
   },
   run: async ({ invoiceId }) => {
-    const supabase = createClient();
-
-    const { data: invoice } = await supabase
-      .from("invoices")
-      .select(
-        "id, status, due_date, currency, amount, team_id, file_path, invoice_number, file_size, template",
-      )
-      .eq("id", invoiceId)
-      .single();
+    const invoice = await getInvoiceById(getDb(), { id: invoiceId });
 
     if (!invoice) {
       logger.error("Invoice data is missing");
       return;
     }
 
-    if (!invoice.amount || !invoice.currency || !invoice.due_date) {
+    if (!invoice.amount || !invoice.currency || !invoice.dueDate) {
       logger.error("Invoice data is missing");
       return;
     }
 
-    // @ts-expect-error JSONB
     const timezone = invoice.template?.timezone || "UTC";
 
     // Find recent transactions matching invoice amount, currency, and team_id
-    const { data: transactions } = await supabase
-      .from("transactions")
-      .select("id")
-      .eq("team_id", invoice.team_id)
-      .eq("amount", invoice.amount)
-      .eq("currency", invoice.currency?.toUpperCase())
-      .gte(
-        "date",
-        // Get the transactions from the last 3 days
-        subDays(new TZDate(new Date(), timezone), 3).toISOString(),
-      )
-      .eq("is_fulfilled", false);
+    const transactions = await findUnfulfilledTransactionsForInvoice(getDb(), {
+      teamId: invoice.teamId,
+      amount: invoice.amount,
+      currency: invoice.currency,
+      since: subDays(new TZDate(new Date(), timezone), 3).toISOString(),
+    });
 
     // We have a match
     if (transactions && transactions.length === 1) {
       const transactionId = transactions.at(0)?.id;
-      const filename = `${invoice.invoice_number}.pdf`;
+      const filename = `${invoice.invoiceNumber}.pdf`;
 
       // Attach the invoice file to the transaction and mark as paid
-      await supabase
-        .from("transaction_attachments")
-        .insert({
-          type: "application/pdf",
-          path: invoice.file_path,
-          transaction_id: transactionId,
-          team_id: invoice.team_id,
-          name: filename,
-          size: invoice.file_size,
-        })
-        .select()
-        .single();
+      const attachment = await createTransactionAttachment(getDb(), {
+        type: "application/pdf",
+        path: invoice.filePath,
+        transactionId: transactionId!,
+        teamId: invoice.teamId,
+        name: filename,
+        size: invoice.fileSize,
+      });
+      if (!attachment) throw new Error("Transaction not found");
 
       await updateInvoiceStatus({
         invoiceId,
+        teamId: invoice.teamId,
         status: "paid",
-        paid_at: new Date().toISOString(),
+        paidAt: new Date().toISOString(),
       });
     } else {
       // Check if the invoice is overdue
       const isOverdue =
-        new TZDate(invoice.due_date, timezone) <
+        new TZDate(invoice.dueDate, timezone) <
         new TZDate(new Date(), timezone);
 
       // Update invoice status to overdue if it's past due date and currently unpaid
       if (isOverdue && invoice.status === "unpaid") {
         await updateInvoiceStatus({
           invoiceId,
+          teamId: invoice.teamId,
           status: "overdue",
         });
       }

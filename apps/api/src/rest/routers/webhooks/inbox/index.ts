@@ -1,6 +1,5 @@
 import type { Context } from "@api/rest/types";
 import { resend } from "@api/services/resend";
-import { createAdminClient } from "@api/services/supabase";
 import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 import { getTeamByInboxId } from "@midday/db/queries";
 import { getAllowedAttachments } from "@midday/documents";
@@ -192,7 +191,6 @@ app.openapi(
     }
 
     const db = c.get("db");
-    const supabase = await createAdminClient();
 
     try {
       const teamData = await getTeamByInboxId(db, inboxId);
@@ -286,7 +284,7 @@ app.openapi(
       // Upload all attachments in parallel
       const uploadPromises = filteredAttachments.map((attachment) =>
         uploadAttachment(
-          supabase,
+          db,
           teamId,
           attachment,
           FromFull?.Email || null,

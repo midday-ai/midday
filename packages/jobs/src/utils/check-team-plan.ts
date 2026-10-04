@@ -1,21 +1,8 @@
-import { createClient } from "@midday/supabase/job";
+import { getDb } from "@jobs/init";
+import { getTeamById } from "@midday/db/queries";
 
 export async function shouldSendEmail(teamId: string) {
-  const supabase = createClient();
-
-  const { data, error } = await supabase
-    .from("teams")
-    .select("id, plan, subscription_status")
-    .eq("id", teamId)
-    .single();
-
-  if (error) {
-    throw new Error(error.message);
-  }
-
-  if (!data) {
-    return false;
-  }
-
-  return data.plan === "trial" || data.subscription_status === "trialing";
+  const team = await getTeamById(getDb(), teamId);
+  if (!team) return false;
+  return team.plan === "trial" || team.subscriptionStatus === "trialing";
 }

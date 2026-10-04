@@ -25,7 +25,7 @@ const getDisconnect = () => {
 // Middleware is run around every run
 tasks.middleware("db", async ({ next }) => {
   // Create a fresh database instance for each job run
-  // This ensures consistent connection pooling with optimized settings for Supabase
+  // This ensures a per-run pool with consistent connection settings
   const dbObj = createJobDb();
   locals.set(DbLocal, dbObj);
 

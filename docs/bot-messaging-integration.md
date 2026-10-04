@@ -525,3 +525,7 @@ type NotificationContext = {
   sentAt: string;
 };
 ```
+
+## Backend configuration
+
+The default Supabase profile retains its vault bucket and registration trigger. With `NEXT_PUBLIC_BACKEND_PROVIDER=local`, attachments use the S3 `vault` bucket and explicit document registration. Configure the same backend in the API and worker. Messaging adapters register only when their required credentials are present; unconfigured webhooks return HTTP 503.

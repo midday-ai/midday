@@ -65,20 +65,58 @@
         "GIT_COMMIT_SHA",
         "NEXT_PUBLIC_WHATSAPP_NUMBER",
         "NEXT_PUBLIC_TELEGRAM_BOT_USERNAME",
-        "NEXT_PUBLIC_SENDBLUE_NUMBER"
+        "NEXT_PUBLIC_SENDBLUE_NUMBER",
+        "DATABASE_*",
+        "REDIS_*",
+        "SUPABASE_*",
+        "BETTER_AUTH_*",
+        "AUTH_*",
+        "STORAGE_*",
+        "NEXT_PUBLIC_*",
+        "NEW_USER_CUTOFF"
       ]
     },
     "start": {
-      "cache": false
+      "cache": false,
+      "passThroughEnv": [
+        "DATABASE_*",
+        "REDIS_*",
+        "SUPABASE_*",
+        "BETTER_AUTH_*",
+        "AUTH_*",
+        "STORAGE_*",
+        "NEXT_PUBLIC_*",
+        "NEW_USER_CUTOFF"
+      ]
     },
     "test": {
       "cache": false,
-      "env": ["TEST_DATABASE_URL"]
+      "env": [
+        "TEST_DATABASE_URL",
+        "DATABASE_SSL",
+        "STORAGE_ENDPOINT",
+        "STORAGE_PUBLIC_ENDPOINT",
+        "STORAGE_ACCESS_KEY_ID",
+        "STORAGE_SECRET_ACCESS_KEY",
+        "STORAGE_FORCE_PATH_STYLE",
+        "MFA_TEST_DATABASE_URL",
+        "REALTIME_TEST_DATABASE_URL"
+      ]
     },
     "dev": {
       "inputs": ["$TURBO_DEFAULT$", ".env"],
       "persistent": true,
-      "cache": false
+      "cache": false,
+      "passThroughEnv": [
+        "DATABASE_*",
+        "REDIS_*",
+        "SUPABASE_*",
+        "BETTER_AUTH_*",
+        "AUTH_*",
+        "STORAGE_*",
+        "NEXT_PUBLIC_*",
+        "NEW_USER_CUTOFF"
+      ]
     },
     "jobs": {
       "persistent": true,
@@ -94,6 +132,13 @@
     },
     "typecheck": {
       "outputs": []
+    },
+    "db:migrate": {
+      "cache": false
+    },
+    "db:generate": {
+      "cache": false
     }
-  }
+  },
+  "globalEnv": ["NEXT_PUBLIC_BACKEND_PROVIDER"]
 }

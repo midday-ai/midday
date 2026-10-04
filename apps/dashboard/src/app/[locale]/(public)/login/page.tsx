@@ -1,9 +1,11 @@
 import { createClient } from "@midday/supabase/server";
 import { Icons } from "@midday/ui/icons";
+import { isLocalBackend } from "@midday/utils/backend";
 import type { Metadata } from "next";
 import { cookies, headers } from "next/headers";
 import Link from "next/link";
 import { userAgent } from "next/server";
+import LocalLoginPage from "@/components/local-login-page";
 import { LoginAccordion } from "@/components/login-accordion";
 import { LoginVideoBackground } from "@/components/login-video-background";
 import { OAuthSignIn } from "@/components/oauth-sign-in";
@@ -21,6 +23,7 @@ type Props = {
 };
 
 export default async function Page({ searchParams }: Props) {
+  if (isLocalBackend()) return <LocalLoginPage searchParams={searchParams} />;
   const { waitlist: waitlistParam } = await searchParams;
   const cookieStore = await cookies();
   const preferred = cookieStore.get(Cookies.PreferredSignInProvider);

@@ -20,7 +20,6 @@
     "@microsoft/microsoft-graph-client": "^3.0.7",
     "@midday/db": "workspace:*",
     "@midday/encryption": "workspace:*",
-    "@midday/supabase": "workspace:*",
     "@midday/utils": "workspace:*",
     "googleapis": "^171.4.0",
     "zod": "catalog:"

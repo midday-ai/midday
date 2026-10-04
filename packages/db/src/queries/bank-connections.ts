@@ -419,18 +419,27 @@ export const getBankConnectionByReferenceId = async (
   });
 };
 
-export const updateBankConnectionStatus = async (
+export async function updateBankConnectionStatus(
   db: Database,
-  params: { id: string; status: "connected" | "disconnected" | "unknown" },
-) => {
-  const [result] = await db
+  params: {
+    id: string;
+    teamId?: string;
+    status: "connected" | "disconnected" | "unknown";
+    lastAccessed?: string;
+  },
+) {
+  const [row] = await db
     .update(bankConnections)
-    .set({ status: params.status })
-    .where(eq(bankConnections.id, params.id))
+    .set({ status: params.status, lastAccessed: params.lastAccessed })
+    .where(
+      and(
+        eq(bankConnections.id, params.id),
+        params.teamId ? eq(bankConnections.teamId, params.teamId) : undefined,
+      ),
+    )
     .returning({ id: bankConnections.id });
-
-  return result;
-};
+  return row;
+}
 
 export type GetBankAccountsWithPaymentInfoParams = {
   teamId: string;

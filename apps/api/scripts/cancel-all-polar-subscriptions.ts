@@ -65,7 +65,9 @@ const polar = new Polar({ accessToken, server });
 
 console.log("=== Polar bulk subscription cancellation ===");
 console.log(`Environment : ${server}`);
-console.log(`Mode        : ${REVOKE ? "REVOKE (immediate)" : "cancel_at_period_end"}`);
+console.log(
+  `Mode        : ${REVOKE ? "REVOKE (immediate)" : "cancel_at_period_end"}`,
+);
 console.log(`Dry run     : ${DRY_RUN ? "yes" : "no"}`);
 console.log("");
 
@@ -113,7 +115,8 @@ for await (const page of iterator) {
 
     totalActionable++;
 
-    const teamId = (sub.metadata?.teamId as string | undefined) ?? "(no teamId)";
+    const teamId =
+      (sub.metadata?.teamId as string | undefined) ?? "(no teamId)";
     const email = sub.customer?.email ?? "(no email)";
     const label = `${sub.id} status=${sub.status} cancelAtPeriodEnd=${sub.cancelAtPeriodEnd} teamId=${teamId} email=${email}`;
 
@@ -155,7 +158,9 @@ console.log(`Already scheduled (skipped) : ${totalSkippedAlreadyScheduled}`);
 console.log(`Matched for action          : ${totalActionable}`);
 
 if (!DRY_RUN) {
-  console.log(`Successfully ${REVOKE ? "revoked" : "scheduled"}    : ${totalSucceeded}`);
+  console.log(
+    `Successfully ${REVOKE ? "revoked" : "scheduled"}    : ${totalSucceeded}`,
+  );
   console.log(`Failed                      : ${failures.length}`);
 
   if (failures.length) {

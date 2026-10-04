@@ -61,7 +61,7 @@ jobs:
     timeout-minutes: 20
     services:
       postgres-test:
-        image: pgvector/pgvector:pg16
+        image: pgvector/pgvector:pg17
         env:
           POSTGRES_DB: midday_test
           POSTGRES_USER: postgres
@@ -86,8 +86,7 @@ jobs:
 
       - name: Setup test database schema
         run: |
-          PGPASSWORD=postgres psql -h localhost -p 5433 -U postgres -d midday_test -f src/test/helpers/setup-test-db.sql
-          bunx drizzle-kit push --config=drizzle.config.test.ts --force
+          NEXT_PUBLIC_BACKEND_PROVIDER=local DATABASE_MIGRATION_URL=postgres://postgres:postgres@localhost:5433/midday_test DATABASE_SSL=disable bun run src/migrate.ts
         working-directory: packages/db
 
       - name: Lint

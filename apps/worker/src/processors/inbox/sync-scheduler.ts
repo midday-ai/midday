@@ -12,7 +12,7 @@ import {
   isInboxAuthError,
 } from "@midday/inbox/errors";
 import { triggerJob } from "@midday/job-client";
-import { createClient } from "@midday/supabase/job";
+import { uploadVaultObject } from "@midday/storage/vault";
 import { ensureFileExtension } from "@midday/utils";
 import type { Job } from "bullmq";
 import type { InboxProviderSyncAccountPayload } from "../../schemas/inbox";
@@ -34,7 +34,6 @@ export class SyncSchedulerProcessor extends BaseProcessor<InboxProviderSyncAccou
     syncedAt: string;
   }> {
     const { id: inboxAccountId, manualSync = false } = job.data;
-    const supabase = createClient();
     const db = getDb();
 
     if (!inboxAccountId) {
@@ -204,12 +203,12 @@ export class SyncSchedulerProcessor extends BaseProcessor<InboxProviderSyncAccou
               item.mimeType,
             );
 
-            const { data: uploadData } = await supabase.storage
-              .from("vault")
-              .upload(`${accountRow.teamId}/inbox/${safeFilename}`, item.data, {
-                contentType: item.mimeType,
-                upsert: true,
-              });
+            const uploadData = await uploadVaultObject(getDb(), {
+              teamId: accountRow.teamId,
+              key: `${accountRow.teamId}/inbox/${safeFilename}`,
+              body: item.data,
+              contentType: item.mimeType,
+            });
 
             if (uploadData) {
               results.push({

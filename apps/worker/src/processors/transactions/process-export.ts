@@ -1,6 +1,6 @@
 import { getTransactionsByIds } from "@midday/db/queries";
-import { createClient } from "@midday/supabase/job";
-import { download } from "@midday/supabase/storage";
+import { download } from "@midday/storage";
+import { assertTeamKey } from "@midday/storage/keys";
 import { ensureFileExtension } from "@midday/utils";
 import {
   calculateBaseTaxAmount,
@@ -36,7 +36,6 @@ export class ProcessExportProcessor extends BaseProcessor<ProcessExportPayload> 
     }>;
   }> {
     const { ids, teamId, locale, dateFormat, onProgress } = params;
-    const supabase = createClient(); // Keep for storage operations
     const db = getDb();
 
     if (onProgress) await onProgress(10);
@@ -80,10 +79,10 @@ export class ProcessExportProcessor extends BaseProcessor<ProcessExportPayload> 
                     ? `${baseFilename}-${rowId}_${idx2}.${extension}`
                     : `${baseFilename}-${rowId}.${extension}`;
 
-                const { data } = await download(supabase, {
-                  bucket: "vault",
-                  path: (attachment.path ?? []).join("/"),
-                });
+                const data = await download(
+                  "vault",
+                  assertTeamKey(teamId, (attachment.path ?? []).join("/")),
+                );
 
                 return {
                   id: transaction.id,

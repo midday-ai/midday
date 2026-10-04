@@ -1,6 +1,11 @@
+import { getDb } from "@jobs/init";
 import { parseAPIError } from "@jobs/utils/parse-error";
 import { getClassification } from "@jobs/utils/transform";
-import { createClient } from "@midday/supabase/job";
+import {
+  getBankAccountCurrency,
+  type UpdateBankAccountSyncStateParams,
+  updateBankAccountSyncState,
+} from "@midday/db/queries";
 import { trpc } from "@midday/trpc";
 import { logger, schemaTask } from "@trigger.dev/sdk";
 import { z } from "zod";
@@ -42,18 +47,13 @@ export const syncAccount = schemaTask({
     currency: storedCurrency,
     manualSync,
   }) => {
-    const supabase = createClient();
     const classification = getClassification(accountType);
 
     // Only heal currency when we know for certain it's "XXX".
     // If the caller didn't pass the currency, query the DB so we don't guess.
     let currentCurrency = storedCurrency;
     if (!currentCurrency) {
-      const { data: accountData } = await supabase
-        .from("bank_accounts")
-        .select("currency")
-        .eq("id", id)
-        .single();
+      const accountData = await getBankAccountCurrency(getDb(), { id, teamId });
       currentCurrency = accountData?.currency ?? undefined;
     }
 
@@ -84,12 +84,14 @@ export const syncAccount = schemaTask({
       // Update balance (including zero/negative for overdrafts) and reset errors
       // Only skip update if balance is null (provider didn't return a balance)
       if (balance !== null) {
-        const updatePayload: Record<string, unknown> = {
+        const updatePayload: UpdateBankAccountSyncStateParams = {
+          id,
+          teamId,
           balance,
-          available_balance: balanceData?.available_balance ?? null,
-          credit_limit: balanceData?.credit_limit ?? null,
-          error_details: null,
-          error_retries: null,
+          availableBalance: balanceData?.available_balance ?? null,
+          creditLimit: balanceData?.credit_limit ?? null,
+          errorDetails: null,
+          errorRetries: null,
         };
 
         if (needsCurrencyHeal && balanceCurrencyValid) {
@@ -102,16 +104,15 @@ export const syncAccount = schemaTask({
           });
         }
 
-        await supabase.from("bank_accounts").update(updatePayload).eq("id", id);
+        await updateBankAccountSyncState(getDb(), updatePayload);
       } else {
         // Reset error details and retries even if balance is null
-        await supabase
-          .from("bank_accounts")
-          .update({
-            error_details: null,
-            error_retries: null,
-          })
-          .eq("id", id);
+        await updateBankAccountSyncState(getDb(), {
+          id,
+          teamId,
+          errorDetails: null,
+          errorRetries: null,
+        });
       }
     } catch (error) {
       const parsedError = parseAPIError(error);
@@ -122,13 +123,12 @@ export const syncAccount = schemaTask({
         const retries = errorRetries ? errorRetries + 1 : 1;
 
         // Update the account with the error details and retries
-        await supabase
-          .from("bank_accounts")
-          .update({
-            error_details: parsedError.message,
-            error_retries: retries,
-          })
-          .eq("id", id);
+        await updateBankAccountSyncState(getDb(), {
+          id,
+          teamId,
+          errorDetails: parsedError.message,
+          errorRetries: retries,
+        });
 
         throw error;
       }
@@ -147,13 +147,12 @@ export const syncAccount = schemaTask({
         });
 
       // Reset error details and retries if we successfully got the transactions
-      await supabase
-        .from("bank_accounts")
-        .update({
-          error_details: null,
-          error_retries: null,
-        })
-        .eq("id", id);
+      await updateBankAccountSyncState(getDb(), {
+        id,
+        teamId,
+        errorDetails: null,
+        errorRetries: null,
+      });
 
       const transactionsData = transactionsResult.data;
 
@@ -180,10 +179,11 @@ export const syncAccount = schemaTask({
         )?.currency;
 
         if (txCurrency) {
-          await supabase
-            .from("bank_accounts")
-            .update({ currency: txCurrency })
-            .eq("id", id);
+          await updateBankAccountSyncState(getDb(), {
+            id,
+            teamId,
+            currency: txCurrency,
+          });
 
           logger.info("Healing account currency from transaction", {
             accountId,

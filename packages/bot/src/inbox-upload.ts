@@ -8,7 +8,9 @@ import {
 import { DocumentClient } from "@midday/documents";
 import { triggerJob } from "@midday/job-client";
 import { logger } from "@midday/logger";
-import { createClient } from "@midday/supabase/job";
+import { createSignedUrl } from "@midday/storage";
+import { assertTeamKey } from "@midday/storage/keys";
+import { uploadVaultObject } from "@midday/storage/vault";
 import { getExtensionFromMimeType } from "@midday/utils";
 import { nanoid } from "nanoid";
 
@@ -137,21 +139,16 @@ export async function processInboxUpload(
     platformMeta,
   } = params;
 
-  const supabase = createClient();
   const resolvedFileName = resolveFileName(fileName, mimeType);
   const filePath = [teamId, "inbox", resolvedFileName];
   const filePathStr = filePath.join("/");
 
-  const { data: uploadData, error: uploadError } = await supabase.storage
-    .from("vault")
-    .upload(filePathStr, fileData, {
-      contentType: mimeType,
-      upsert: true,
-    });
-
-  if (uploadError) {
-    throw new Error(`Failed to upload file: ${uploadError.message}`);
-  }
+  const uploadData = await uploadVaultObject(db, {
+    teamId: teamId,
+    key: filePathStr,
+    body: fileData,
+    contentType: mimeType,
+  });
 
   const inboxData = await createInbox(db, {
     displayName: caption || resolvedFileName,
@@ -175,20 +172,19 @@ export async function processInboxUpload(
 
   try {
     const pathForSignedUrl = uploadData?.path || filePathStr;
-    const { data: signedUrlData, error: signedUrlError } =
-      await supabase.storage
-        .from("vault")
-        .createSignedUrl(pathForSignedUrl, 1800);
+    const signedUrlData = await createSignedUrl(
+      "vault",
+      assertTeamKey(teamId, pathForSignedUrl),
+      { expiresIn: 1800 },
+    );
 
-    if (signedUrlError || !signedUrlData?.signedUrl) {
-      throw new Error(
-        `Failed to create signed URL: ${signedUrlError?.message || "No URL returned"}`,
-      );
+    if (!signedUrlData) {
+      throw new Error(`Failed to create signed URL: No URL returned`);
     }
 
     const document = new DocumentClient();
     const result = await document.getInvoiceOrReceipt({
-      documentUrl: signedUrlData.signedUrl,
+      documentUrl: signedUrlData,
       mimetype: mimeType,
     });
 

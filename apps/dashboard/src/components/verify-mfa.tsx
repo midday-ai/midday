@@ -1,10 +1,13 @@
+"use client";
 import { createClient } from "@midday/supabase/client";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@midday/ui/input-otp";
 import { Spinner } from "@midday/ui/spinner";
+import { isLocalBackend } from "@midday/utils/backend";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
+import { LocalVerifyMfa } from "./verify-mfa.local";
 
-export function VerifyMfa() {
+function SupabaseVerifyMfa() {
   const [isValidating, setValidating] = useState(false);
   const [isRedirecting, setIsRedirecting] = useState(false);
   const [error, setError] = useState(false);
@@ -119,4 +122,8 @@ export function VerifyMfa() {
       </p>
     </>
   );
+}
+
+export function VerifyMfa() {
+  return isLocalBackend() ? <LocalVerifyMfa /> : <SupabaseVerifyMfa />;
 }

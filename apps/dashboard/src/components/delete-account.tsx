@@ -1,5 +1,6 @@
 "use client";
 
+import { authClient } from "@midday/auth/client";
 import { LogEvents } from "@midday/events/events";
 import { createClient } from "@midday/supabase/client";
 import {
@@ -23,15 +24,16 @@ import {
 } from "@midday/ui/card";
 import { Input } from "@midday/ui/input";
 import { Label } from "@midday/ui/label";
+import { isLocalBackend } from "@midday/utils/backend";
 import { useOpenPanel } from "@openpanel/nextjs";
 import { useMutation } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 import { useState } from "react";
 import { redirectAfterAccountDeletion } from "@/actions/revalidate-action";
 import { useTRPC } from "@/trpc/client";
+import { clearAccessToken } from "@/utils/session";
 
 export function DeleteAccount() {
-  const supabase = createClient();
   const trpc = useTRPC();
   const { track } = useOpenPanel();
 
@@ -39,7 +41,9 @@ export function DeleteAccount() {
     trpc.user.delete.mutationOptions({
       onSuccess: async () => {
         track(LogEvents.AccountDeleted.name);
-        await supabase.auth.signOut();
+        clearAccessToken();
+        if (isLocalBackend()) await authClient.signOut().catch(() => {});
+        else await createClient().auth.signOut();
         await redirectAfterAccountDeletion();
       },
     }),

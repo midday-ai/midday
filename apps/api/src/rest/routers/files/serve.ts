@@ -1,7 +1,8 @@
 import type { Context } from "@api/rest/types";
 import { proxyFileSchema } from "@api/schemas/files";
-import { createAdminClient } from "@api/services/supabase";
 import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
+import { getStream } from "@midday/storage";
+import { assertTeamKey } from "@midday/storage/keys";
 import { HTTPException } from "hono/http-exception";
 import { withDatabase } from "../../middleware/db";
 import { withFileAuth } from "../../middleware/file-auth";
@@ -70,22 +71,12 @@ app.openapi(
     const { filePath } = c.req.valid("query");
     const { normalizedPath } = normalizeAndValidatePath(filePath);
 
-    const supabase = await createAdminClient();
-
-    // Download the file from storage
-    const { data, error } = await supabase.storage
-      .from("vault")
-      .download(normalizedPath);
-
-    if (error || !data) {
-      throw new HTTPException(404, {
-        message: error?.message || "File not found",
-      });
-    }
-
-    // Get the blob and determine content type
-    const blob = await data.arrayBuffer();
-    const contentType = data.type || "application/octet-stream";
+    const result = await getStream(
+      "vault",
+      assertTeamKey(c.get("teamId"), normalizedPath),
+    );
+    if (!result) throw new HTTPException(404, { message: "File not found" });
+    const contentType = result.contentType || "application/octet-stream";
 
     // Set cache headers for images (long cache for immutable content)
     const headers: Record<string, string> = {
@@ -98,7 +89,7 @@ app.openapi(
       headers["Cache-Control"] = "public, max-age=31536000, immutable";
     }
 
-    return new Response(blob, {
+    return new Response(result.body, {
       headers,
     });
   },

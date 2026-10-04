@@ -1,5 +1,6 @@
+import { getDb } from "@jobs/init";
 import { transformTransaction } from "@jobs/utils/transform";
-import { createClient } from "@midday/supabase/job";
+import { upsertTransactions as insertTransactions } from "@midday/db/queries";
 import { logger, schemaTask, tasks } from "@trigger.dev/sdk";
 import { z } from "zod";
 import { enrichTransactions } from "../../transactions/enrich-transaction";
@@ -32,13 +33,10 @@ export const upsertTransactions = schemaTask({
     transactions: z.array(transactionSchema),
   }),
   run: async ({ transactions, teamId, bankAccountId, manualSync }) => {
-    const supabase = createClient();
-
     try {
       // Transform transactions to match our DB schema
       const formattedTransactions = transactions.map((transaction) => {
         return transformTransaction({
-          // @ts-expect-error - TODO: Fix types with drizzle
           transaction,
           teamId,
           bankAccountId,
@@ -47,15 +45,10 @@ export const upsertTransactions = schemaTask({
       });
 
       // Upsert transactions into the transactions table, skipping duplicates based on internal_id
-      const { data: upsertedTransactions } = await supabase
-        .from("transactions")
-        // @ts-expect-error - TODO: Fix types with drizzle
-        .upsert(formattedTransactions, {
-          onConflict: "internal_id",
-          ignoreDuplicates: true,
-        })
-        .select("id")
-        .throwOnError();
+      const upsertedTransactions = await insertTransactions(getDb(), {
+        transactions: formattedTransactions,
+        teamId,
+      });
 
       const transactionIds = upsertedTransactions?.map((tx) => tx.id) || [];
 

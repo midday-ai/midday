@@ -5,13 +5,15 @@ import { Button } from "@midday/ui/button";
 import { Dialog, DialogContent } from "@midday/ui/dialog";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@midday/ui/input-otp";
 import { Spinner } from "@midday/ui/spinner";
+import { isLocalBackend } from "@midday/utils/backend";
 import Image from "next/image";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useAction } from "next-safe-action/hooks";
 import { useEffect, useState } from "react";
 import { mfaVerifyAction } from "@/actions/mfa-verify-action";
+import { LocalAddNewDeviceModal } from "./add-new-device.local";
 
-export function AddNewDeviceModal() {
+function SupabaseAddNewDeviceModal() {
   const supabase = createClient();
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -152,5 +154,13 @@ export function AddNewDeviceModal() {
         </div>
       </DialogContent>
     </Dialog>
+  );
+}
+
+export function AddNewDeviceModal() {
+  return isLocalBackend() ? (
+    <LocalAddNewDeviceModal />
+  ) : (
+    <SupabaseAddNewDeviceModal />
   );
 }

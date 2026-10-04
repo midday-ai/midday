@@ -8,8 +8,12 @@ const app = new OpenAPIHono<Context>();
 registerMiddayBotRuntime();
 
 app.post("/", async (c) => {
+  const webhook = bot.webhooks.telegram;
+  if (!webhook) {
+    return c.json({ error: "Telegram integration is not configured" }, 503);
+  }
   await bot.initialize();
-  return bot.webhooks.telegram(c.req.raw);
+  return webhook(c.req.raw);
 });
 
 export const telegramWebhookRouter = app;

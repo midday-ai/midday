@@ -1091,7 +1091,7 @@ export async function duplicateInvoice(
 
 export type UpdateInvoiceParams = {
   id: string;
-  status?: "paid" | "canceled" | "unpaid" | "scheduled" | "draft" | "refunded";
+  status?: typeof invoices.$inferInsert.status;
   paidAt?: string | null;
   internalNote?: string | null;
   reminderSentAt?: string | null;

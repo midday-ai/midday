@@ -7,6 +7,7 @@ import { Pool } from "pg";
 import { createDrizzleLogger, instrumentPool } from "./instrument";
 import { withReplicas } from "./replicas";
 import * as schema from "./schema";
+import { getSslConfig } from "./ssl";
 
 const logger = createLoggerWithContext("db");
 
@@ -24,7 +25,7 @@ const connectionConfig = {
   allowExitOnIdle: !isProduction,
   keepAlive: true,
   keepAliveInitialDelayMillis: 10_000,
-  ssl: isDevelopment ? false : { rejectUnauthorized: false },
+  ssl: getSslConfig(),
 };
 
 const drizzleLogger = DEBUG_PERF ? createDrizzleLogger() : undefined;

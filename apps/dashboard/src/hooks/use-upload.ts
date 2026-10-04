@@ -1,48 +1,33 @@
-import { createClient } from "@midday/supabase/client";
-import { upload } from "@midday/supabase/storage";
-import type { SupabaseClient } from "@supabase/supabase-js";
+"use client";
+
+import { isLocalBackend } from "@midday/utils/backend";
 import { useState } from "react";
-
-interface UploadParams {
-  file: File;
-  path: string[];
-  bucket: string;
-}
-
-interface UploadResult {
-  url: string;
-  path: string[];
-}
+import { useResumableUpload } from "@/hooks/use-resumable-upload";
+import type { UploadParams } from "@/utils/upload";
 
 export function useUpload() {
-  const supabase: SupabaseClient = createClient();
-  const [isLoading, setLoading] = useState<boolean>(false);
-
-  const uploadFile = async ({
-    file,
-    path,
-    bucket,
-  }: UploadParams): Promise<UploadResult> => {
-    setLoading(true);
-
+  const { resumableUpload } = useResumableUpload();
+  const [pending, setPending] = useState(0);
+  const uploadFile = async (
+    params: UploadParams,
+  ): Promise<{ url: string; path: string[] }> => {
+    setPending((count) => count + 1);
     try {
-      const url = await upload(supabase, {
-        path,
-        file,
-        bucket,
-      });
-
+      if (!isLocalBackend()) {
+        const [{ createClient }, { uploadWithSupabase }] = await Promise.all([
+          import("@midday/supabase/client"),
+          import("@/utils/upload-supabase"),
+        ]);
+        return uploadWithSupabase(createClient(), params);
+      }
+      const result = await resumableUpload(params);
       return {
-        url,
-        path,
+        url: result.publicUrl ?? result.key,
+        path: result.key.split("/"),
       };
     } finally {
-      setLoading(false);
+      setPending((count) => count - 1);
     }
   };
-
-  return {
-    uploadFile,
-    isLoading,
-  };
+  return { uploadFile, isLoading: pending > 0 };
 }

@@ -6,8 +6,10 @@ import {
   updateDocumentByPath,
 } from "@midday/db/queries";
 import { triggerJob } from "@midday/job-client";
-import { createClient } from "@midday/supabase/job";
-import { signedUrl } from "@midday/supabase/storage";
+import { createSignedUrl } from "@midday/storage";
+import { assertTeamKey } from "@midday/storage/keys";
+import { uploadVaultObject } from "@midday/storage/vault";
+import { isLocalBackend } from "@midday/utils/backend";
 import { getAppUrl } from "@midday/utils/envs";
 import archiver from "archiver";
 import type { Job } from "bullmq";
@@ -64,7 +66,6 @@ export class ExportTransactionsProcessor extends BaseProcessor<ExportTransaction
       dateFormat,
       exportSettings,
     } = job.data;
-    const supabase = createClient();
 
     const filePath = `export-${format(new Date(), `${dateFormat ?? "yyyy-MM-dd"}-HHmm`)}`;
     const path = `${teamId}/exports`;
@@ -209,19 +210,17 @@ export class ExportTransactionsProcessor extends BaseProcessor<ExportTransaction
 
     const fullPath = `${path}/${fileName}`;
 
-    // Upload to Supabase storage with timeout
-    const { error: uploadError } = await withTimeout(
-      supabase.storage.from("vault").upload(fullPath, zip, {
-        upsert: true,
+    // Upload and register in vault storage with timeout
+    await withTimeout(
+      uploadVaultObject(getDb(), {
+        teamId: teamId,
+        key: fullPath,
+        body: zip,
         contentType: "application/zip",
       }),
       TIMEOUTS.FILE_UPLOAD,
       `File upload timed out after ${TIMEOUTS.FILE_UPLOAD}ms`,
     );
-
-    if (uploadError) {
-      throw new Error(`Failed to upload export file: ${uploadError.message}`);
-    }
 
     await this.updateProgress(job, 95);
 
@@ -239,48 +238,47 @@ export class ExportTransactionsProcessor extends BaseProcessor<ExportTransaction
 
     if (settings.sendEmail && settings.accountantEmail) {
       const expireIn = 7 * 24 * 60 * 60;
-      const { data: signedUrlData } = await signedUrl(supabase, {
-        bucket: "vault",
-        path: fullPath,
-        expireIn,
-        options: { download: true },
+      const objectKey = assertTeamKey(teamId, fullPath);
+
+      const shortLink = await createShortLink(getDb(), {
+        url: isLocalBackend()
+          ? `storage://vault/${objectKey}`
+          : await createSignedUrl("vault", objectKey, {
+              expiresIn: expireIn,
+              download: true,
+            }),
+        ...(isLocalBackend() ? { bucket: "vault" as const, objectKey } : {}),
+        teamId,
+        userId,
+        type: "download",
+        fileName,
+        mimeType: "application/zip",
+        expiresAt: new Date(Date.now() + expireIn * 1000).toISOString(),
       });
 
-      if (signedUrlData?.signedUrl) {
-        const shortLink = await createShortLink(getDb(), {
-          url: signedUrlData.signedUrl,
-          teamId,
-          userId,
-          type: "download",
-          fileName,
-          mimeType: "application/zip",
-          expiresAt: new Date(Date.now() + expireIn * 1000).toISOString(),
-        });
+      if (shortLink) {
+        const downloadLink = `${getAppUrl()}/s/${shortLink.shortId}`;
 
-        if (shortLink) {
-          const downloadLink = `${getAppUrl()}/s/${shortLink.shortId}`;
+        this.logger.debug("Short link created for export", { downloadLink });
 
-          this.logger.debug("Short link created for export", { downloadLink });
-
-          try {
-            await triggerJob(
-              "notification",
-              {
-                type: "transactions_exported",
-                teamId,
-                userEmail,
-                transactionCount: rows.length,
-                downloadLink,
-                accountantEmail: settings.accountantEmail,
-                sendCopyToMe: userEmail ? settings.sendCopyToMe : false,
-              },
-              "notifications",
-            );
-          } catch (error) {
-            this.logger.warn("Failed to trigger export notification", {
-              error: error instanceof Error ? error.message : "Unknown error",
-            });
-          }
+        try {
+          await triggerJob(
+            "notification",
+            {
+              type: "transactions_exported",
+              teamId,
+              userEmail,
+              transactionCount: rows.length,
+              downloadLink,
+              accountantEmail: settings.accountantEmail,
+              sendCopyToMe: userEmail ? settings.sendCopyToMe : false,
+            },
+            "notifications",
+          );
+        } catch (error) {
+          this.logger.warn("Failed to trigger export notification", {
+            error: error instanceof Error ? error.message : "Unknown error",
+          });
         }
       }
     }

@@ -1,5 +1,6 @@
+import type { Database } from "@midday/db/client";
+import { getAppByAppId } from "@midday/db/queries";
 import { logger } from "@midday/logger";
-import type { SupabaseClient } from "@supabase/supabase-js";
 import { z } from "zod";
 import { createSlackWebClient, ensureBotInChannel } from "../client";
 
@@ -11,22 +12,23 @@ const transactionSchema = z.object({
 export async function sendSlackTransactionNotifications({
   teamId,
   transactions,
-  supabase,
+  db,
 }: {
   teamId: string;
   transactions: z.infer<typeof transactionSchema>[];
-  supabase: SupabaseClient;
+  db: Database;
 }) {
-  const { data } = await supabase
-    .from("apps")
-    .select("settings, config")
-    .eq("team_id", teamId)
-    .eq("app_id", "slack")
-    .single();
+  const data = await getAppByAppId(db, { teamId, appId: "slack" });
 
-  const enabled = data?.settings?.find(
-    (setting: { id: string; value: boolean }) => setting.id === "transactions",
-  )?.value;
+  const settings = z.array(z.unknown()).safeParse(data?.settings);
+  const enabled =
+    settings.success &&
+    settings.data.some(
+      (setting) =>
+        z
+          .object({ id: z.literal("transactions"), value: z.literal(true) })
+          .safeParse(setting).success,
+    );
 
   if (!enabled || !data?.config?.access_token) {
     return;

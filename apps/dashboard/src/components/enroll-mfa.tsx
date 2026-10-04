@@ -1,3 +1,4 @@
+"use client";
 import { createClient } from "@midday/supabase/client";
 import { Button } from "@midday/ui/button";
 import {
@@ -7,13 +8,15 @@ import {
 } from "@midday/ui/collapsible";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@midday/ui/input-otp";
 import { Spinner } from "@midday/ui/spinner";
+import { isLocalBackend } from "@midday/utils/backend";
 import { CaretSortIcon } from "@radix-ui/react-icons";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { CopyInput } from "./copy-input";
+import { LocalEnrollMFA } from "./enroll-mfa.local";
 
-export function EnrollMFA() {
+function SupabaseEnrollMFA() {
   const supabase = createClient();
   const router = useRouter();
   const [isValidating, setValidating] = useState(false);
@@ -156,5 +159,13 @@ export function EnrollMFA() {
         </Button>
       </div>
     </>
+  );
+}
+
+export function EnrollMFA(props: Parameters<typeof LocalEnrollMFA>[0]) {
+  return isLocalBackend() ? (
+    <LocalEnrollMFA {...props} />
+  ) : (
+    <SupabaseEnrollMFA />
   );
 }

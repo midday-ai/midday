@@ -205,3 +205,54 @@ describe("tRPC: inbox.search", () => {
     );
   });
 });
+
+describe("tRPC: inbox deletion mirrors storage deletes", () => {
+  beforeEach(() => {
+    mocks.removeStorage.mockClear();
+    mocks.deleteDocumentsByNames.mockClear();
+  });
+  test("removes the object and document mirror using the same canonical key", async () => {
+    mocks.deleteInbox.mockImplementation(() =>
+      Promise.resolve({
+        id: INBOX_NEW_ID,
+        filePath: ["test-team-id", "inbox", "literal%2F.pdf"],
+      }),
+    );
+    await createCaller(createTestContext()).delete({ id: INBOX_NEW_ID });
+    expect(mocks.removeStorage).toHaveBeenCalledWith("vault", [
+      "test-team-id/inbox/literal%2F.pdf",
+    ]);
+    expect(mocks.deleteDocumentsByNames).toHaveBeenCalledWith(
+      expect.anything(),
+      {
+        teamId: "test-team-id",
+        names: ["test-team-id/inbox/literal%2F.pdf"],
+      },
+    );
+  });
+  test("rejects a foreign path without deleting any objects or documents", async () => {
+    mocks.deleteInbox.mockImplementation(() =>
+      Promise.resolve({
+        id: INBOX_NEW_ID,
+        filePath: ["other-team", "invoice.pdf"],
+      }),
+    );
+    await expect(
+      createCaller(createTestContext()).delete({ id: INBOX_NEW_ID }),
+    ).rejects.toMatchObject({ code: "FORBIDDEN" });
+    expect(mocks.removeStorage).not.toHaveBeenCalled();
+    expect(mocks.deleteDocumentsByNames).not.toHaveBeenCalled();
+  });
+  test("validates all deleteMany paths before deleting storage", async () => {
+    mocks.deleteInboxMany.mockImplementation(() =>
+      Promise.resolve([
+        { id: INBOX_NEW_ID, filePath: ["test-team-id", "good.pdf"] },
+        { id: "other", filePath: ["other-team", "bad.pdf"] },
+      ]),
+    );
+    await expect(
+      createCaller(createTestContext()).deleteMany([INBOX_NEW_ID]),
+    ).rejects.toMatchObject({ code: "FORBIDDEN" });
+    expect(mocks.removeStorage).not.toHaveBeenCalled();
+  });
+});

@@ -1,6 +1,7 @@
 import { teamCache } from "@midday/cache/team-cache";
 import type { Database } from "@midday/db/client";
 import { hasTeamAccess } from "@midday/db/queries";
+import { normalizeKey, StorageKeyError } from "@midday/storage/keys";
 import { HTTPException } from "hono/http-exception";
 
 /**
@@ -12,10 +13,14 @@ export function normalizeAndValidatePath(filePath: string): {
   pathTeamId: string;
   pathArray: string[];
 } {
-  // Normalize path
-  const normalizedPath = filePath.startsWith("vault/")
-    ? filePath.substring("vault/".length)
-    : filePath;
+  let normalizedPath: string;
+  try {
+    normalizedPath = normalizeKey(filePath);
+  } catch (error) {
+    if (error instanceof StorageKeyError)
+      throw new HTTPException(400, { message: "Invalid storage path" });
+    throw error;
+  }
 
   // Extract teamId from path and validate
   const pathParts = normalizedPath.split("/");

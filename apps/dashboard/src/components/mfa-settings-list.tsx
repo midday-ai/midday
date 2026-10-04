@@ -8,10 +8,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@midday/ui/card";
+import { isLocalBackend } from "@midday/utils/backend";
 import Link from "next/link";
+import { LocalMfaSettingsList } from "./mfa-settings-list.local";
 import { UnenrollMFA } from "./unenroll-mfa";
 
-export async function MfaSettingsList() {
+async function SupabaseMfaSettingsList() {
   const supabase = await createClient();
   const { data } = await supabase.auth.mfa.listFactors();
   const hasMfaFactors = data?.all && data.all.length > 0;
@@ -43,5 +45,13 @@ export async function MfaSettingsList() {
         </Link>
       </CardFooter>
     </Card>
+  );
+}
+
+export async function MfaSettingsList() {
+  return isLocalBackend() ? (
+    <LocalMfaSettingsList />
+  ) : (
+    <SupabaseMfaSettingsList />
   );
 }

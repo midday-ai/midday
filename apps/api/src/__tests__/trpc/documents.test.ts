@@ -97,7 +97,7 @@ describe("tRPC: documents.getById", () => {
       Promise.resolve({
         id: DOC_ID,
         title: "Statement",
-        pathTokens: ["team", "vault", "statement.pdf"],
+        pathTokens: ["test-team-id", "vault", "statement.pdf"],
       }),
     );
   });
@@ -107,7 +107,7 @@ describe("tRPC: documents.getById", () => {
       Promise.resolve({
         id: DOC_ID,
         title: "Statement",
-        pathTokens: ["team", "vault", "statement.pdf"],
+        pathTokens: ["test-team-id", "vault", "statement.pdf"],
       }),
     );
 
@@ -125,7 +125,7 @@ describe("tRPC: documents.getById", () => {
       Promise.resolve({
         id: DOC_ID,
         title: "Statement",
-        pathTokens: ["team", "vault", "statement.pdf"],
+        pathTokens: ["test-team-id", "vault", "statement.pdf"],
       }),
     );
 
@@ -157,7 +157,7 @@ describe("tRPC: documents.delete", () => {
     mocks.deleteDocument.mockImplementation(() =>
       Promise.resolve({
         id: DOC_ID,
-        pathTokens: ["team", "vault", "file.pdf"],
+        pathTokens: ["test-team-id", "vault", "file.pdf"],
       }),
     );
   });
@@ -166,7 +166,7 @@ describe("tRPC: documents.delete", () => {
     mocks.deleteDocument.mockImplementation(() =>
       Promise.resolve({
         id: DOC_ID,
-        pathTokens: ["team", "vault", "file.pdf"],
+        pathTokens: ["test-team-id", "vault", "file.pdf"],
       }),
     );
 
@@ -181,7 +181,7 @@ describe("tRPC: documents.delete", () => {
     mocks.deleteDocument.mockImplementation(() =>
       Promise.resolve({
         id: DOC_ID,
-        pathTokens: ["a", "b"],
+        pathTokens: ["test-team-id", "b"],
       }),
     );
 
@@ -253,59 +253,57 @@ describe("tRPC: documents.checkAttachments", () => {
   });
 });
 
-describe("tRPC: documents.signedUrl", () => {
+describe("tRPC: documents signed URLs enforce team namespaces", () => {
   beforeEach(() => {
     mocks.signedUrl.mockReset();
     mocks.signedUrl.mockImplementation(() =>
-      Promise.resolve({
-        data: { signedUrl: "https://example.com/signed-doc" },
-        error: null,
-      }),
+      Promise.resolve("https://example.com/signed-doc"),
     );
   });
-
-  test("returns signed URL payload for vault path", async () => {
+  test("returns an own-team signed URL", async () => {
     const caller = createCaller(createTestContext());
-    const result = await caller.signedUrl({
-      filePath: "test/doc.pdf",
-      expireIn: 3600,
-    });
-
-    expect(result).toEqual({ signedUrl: "https://example.com/signed-doc" });
-    expect(mocks.signedUrl).toHaveBeenCalledWith(
-      expect.anything(),
-      expect.objectContaining({
-        bucket: "vault",
-        path: "test/doc.pdf",
+    expect(
+      await caller.signedUrl({
+        filePath: "test-team-id/doc.pdf",
         expireIn: 3600,
       }),
-    );
-  });
-});
-
-describe("tRPC: documents.signedUrls", () => {
-  beforeEach(() => {
-    mocks.signedUrl.mockReset();
-    mocks.signedUrl.mockImplementation(() =>
-      Promise.resolve({
-        data: { signedUrl: "https://example.com/signed-batch" },
-        error: null,
-      }),
-    );
-  });
-
-  test("returns list of signed URL strings for paths", async () => {
-    const caller = createCaller(createTestContext());
-    const result = await caller.signedUrls(["test/doc.pdf"]);
-
-    expect(result).toEqual(["https://example.com/signed-batch"]);
+    ).toEqual({ signedUrl: "https://example.com/signed-doc" });
     expect(mocks.signedUrl).toHaveBeenCalledWith(
-      expect.anything(),
-      expect.objectContaining({
-        bucket: "vault",
-        path: "test/doc.pdf",
-        expireIn: 60,
-      }),
+      "vault",
+      "test-team-id/doc.pdf",
+      { expiresIn: 3600 },
+    );
+  });
+  test("rejects cross-team paths before signing", async () => {
+    const caller = createCaller(createTestContext());
+    for (const filePath of [
+      "other-team/doc.pdf",
+      "test-team-id-evil/doc.pdf",
+      "test-team-id/../other/doc.pdf",
+      "test-team-id%2Fother/doc.pdf",
+    ]) {
+      await expect(
+        caller.signedUrl({ filePath, expireIn: 60 }),
+      ).rejects.toMatchObject({ code: "FORBIDDEN" });
+    }
+    expect(mocks.signedUrl).not.toHaveBeenCalled();
+  });
+  test("rejects the entire mixed-team batch before signing any file", async () => {
+    const caller = createCaller(createTestContext());
+    await expect(
+      caller.signedUrls(["test-team-id/good.pdf", "other-team/bad.pdf"]),
+    ).rejects.toMatchObject({ code: "FORBIDDEN" });
+    expect(mocks.signedUrl).not.toHaveBeenCalled();
+  });
+  test("signs own-team batches with canonical percent-preserving keys", async () => {
+    const caller = createCaller(createTestContext());
+    expect(
+      await caller.signedUrls(["/vault/test-team-id/literal%2F.pdf"]),
+    ).toEqual(["https://example.com/signed-doc"]);
+    expect(mocks.signedUrl).toHaveBeenCalledWith(
+      "vault",
+      "test-team-id/literal%2F.pdf",
+      { expiresIn: 60 },
     );
   });
 });

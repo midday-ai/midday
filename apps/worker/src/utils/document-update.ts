@@ -8,9 +8,8 @@ import type { createLoggerWithContext } from "@midday/logger";
 /**
  * Update a document by path with retry logic for race conditions.
  *
- * This handles the case where a Supabase storage trigger creates the document
- * record slightly after the job starts processing. If the first update returns
- * 0 rows (document not found), we retry after a short delay.
+ * The documents row is created synchronously by uploadVaultObject;
+ * retry is retained as a guard against unexpected timing or legacy jobs.
  *
  * @param db - Database connection
  * @param params - Update parameters (pathTokens, teamId, etc.)

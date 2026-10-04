@@ -1,21 +1,23 @@
 "use client";
 
+import { authClient } from "@midday/auth/client";
 import { createClient } from "@midday/supabase/client";
 import { DropdownMenuItem } from "@midday/ui/dropdown-menu";
+import { isLocalBackend } from "@midday/utils/backend";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { clearAccessToken } from "@/utils/session";
 
 export function SignOut() {
   const [isLoading, setLoading] = useState(false);
-  const supabase = createClient();
   const router = useRouter();
 
   const handleSignOut = async () => {
     setLoading(true);
 
-    await supabase.auth.signOut({
-      scope: "local",
-    });
+    clearAccessToken();
+    if (isLocalBackend()) await authClient.signOut();
+    else await createClient().auth.signOut({ scope: "local" });
 
     router.push("/login");
   };

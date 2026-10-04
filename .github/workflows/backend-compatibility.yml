@@ -1,0 +1,196 @@
+name: Backend compatibility
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash
+
+concurrency:
+  group: backend-compatibility-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  local-and-provider-contracts:
+    name: Local stack and Supabase contracts
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    env:
+      CI: "true"
+      NODE_ENV: development
+      NODE_OPTIONS: --max-old-space-size=4096
+      NEXT_BUILD_WORKERS: "1"
+      RAYON_NUM_THREADS: "2"
+      NEXT_TELEMETRY_DISABLED: "1"
+      TURBO_TELEMETRY_DISABLED: "1"
+      NEXT_PUBLIC_BACKEND_PROVIDER: local
+      DATABASE_SSL: disable
+      DATABASE_PRIMARY_URL: postgres://postgres:postgres@localhost:5432/midday_test
+      DATABASE_PRIMARY_POOLER_URL: postgres://postgres:postgres@localhost:5432/midday_test
+      DATABASE_MIGRATION_URL: postgres://postgres:postgres@localhost:5432/midday_test
+      DATABASE_LISTEN_URL: postgres://postgres:postgres@localhost:5432/midday_test
+      TEST_DATABASE_URL: postgres://postgres:postgres@localhost:5432/midday_test
+      MFA_TEST_DATABASE_URL: postgres://postgres:postgres@localhost:5432/midday_test
+      REALTIME_TEST_DATABASE_URL: postgres://postgres:postgres@localhost:5432/midday_test
+      REDIS_URL: redis://localhost:6379
+      REDIS_QUEUE_URL: redis://localhost:6379
+      BETTER_AUTH_URL: http://localhost:3001
+      AUTH_JWKS_URL: http://localhost:3001/api/auth/jwks
+      AUTH_JWT_ISSUER: http://localhost:3001
+      AUTH_JWT_AUDIENCE: midday-api
+      AUTH_TOTP_ISSUER: Midday
+      NEXT_PUBLIC_URL: http://localhost:3001
+      NEXT_PUBLIC_API_URL: http://localhost:3003
+      MIDDAY_DASHBOARD_URL: http://localhost:3001
+      MIDDAY_API_URL: http://localhost:3003
+      ALLOWED_API_ORIGINS: http://localhost:3001
+      NEXT_PUBLIC_STORAGE_PUBLIC_HOSTS: localhost:9000
+      NEXT_PUBLIC_REALTIME_ENABLED: "true"
+      STORAGE_ENDPOINT: http://localhost:9000
+      STORAGE_PUBLIC_ENDPOINT: http://localhost:9000
+      STORAGE_REGION: us-east-1
+      STORAGE_ACCESS_KEY_ID: midday
+      STORAGE_SECRET_ACCESS_KEY: midday-secret
+      STORAGE_FORCE_PATH_STYLE: "true"
+      STORAGE_BUCKET_VAULT: vault
+      STORAGE_BUCKET_AVATARS: avatars
+      STORAGE_BUCKET_APPS: apps
+      STORAGE_PUBLIC_URL_AVATARS: http://localhost:9000/avatars
+      STORAGE_PUBLIC_URL_APPS: http://localhost:9000/apps
+      E2E_DATABASE_URL: postgres://postgres:postgres@localhost:5432/midday_e2e
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22.23.3"
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: "1.3.11"
+
+      - name: Install locked dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Generate ephemeral local application secrets
+        shell: bash
+        run: |
+          mkdir -p test-results/ci
+          for key in BETTER_AUTH_SECRET FILE_KEY_SECRET INVOICE_JWT_SECRET MIDDAY_ENCRYPTION_KEY; do
+            value=$(openssl rand -hex 32)
+            echo "::add-mask::$value"
+            echo "$key=$value" >> "$GITHUB_ENV"
+          done
+
+      - name: Start local Postgres, Redis and MinIO
+        run: bun run infra:up 2>&1 | tee test-results/ci/infra.log
+
+      - name: Apply local migrations twice to verify idempotence
+        run: |
+          bun run db:migrate 2>&1 | tee test-results/ci/migrate-first.log
+          bun run db:migrate 2>&1 | tee test-results/ci/migrate-second.log
+
+      - name: Build required workspace outputs
+        run: |
+          bun run --cwd packages/workbench build:ui
+          bun run --cwd packages/workbench build:lib
+          bun run --cwd packages/mcp-apps build
+
+      - name: Lint without cached results
+        run: |
+          bunx turbo lint --force --concurrency=1 2>&1 | tee test-results/ci/lint.log
+          bunx biome check tests/e2e/*.ts tests/e2e/*.json
+
+      - name: Typecheck without cached results
+        run: bunx turbo typecheck --force --concurrency=1 2>&1 | tee test-results/ci/typecheck.log
+
+      - name: Database unit, SQL parity and tenant integration tests
+        env:
+          NEXT_PUBLIC_BACKEND_PROVIDER: supabase
+        run: bun run --cwd packages/db test 2>&1 | tee test-results/ci/database-tests.log
+
+      - name: Auth provider, JWT and real Postgres MFA tests
+        env:
+          NEXT_PUBLIC_BACKEND_PROVIDER: supabase
+        run: bun run --cwd packages/auth test 2>&1 | tee test-results/ci/auth-tests.log
+
+      - name: Storage provider contracts and real MinIO tests
+        run: bun run --cwd packages/storage test 2>&1 | tee test-results/ci/storage-tests.log
+
+      - name: API, tenant and real Postgres SSE tests
+        env:
+          NEXT_PUBLIC_BACKEND_PROVIDER: supabase
+        run: bun run --cwd apps/api test 2>&1 | tee test-results/ci/api-tests.log
+
+      - name: Jobs unit tests
+        env:
+          NEXT_PUBLIC_BACKEND_PROVIDER: supabase
+        run: bun run --cwd packages/jobs test 2>&1 | tee test-results/ci/jobs-tests.log
+
+      - name: Remaining workspace unit tests
+        env:
+          NEXT_PUBLIC_BACKEND_PROVIDER: supabase
+        run: |
+          for package in accounting banking documents encryption import inbox invoice mcp-apps; do
+            bun run --cwd "packages/$package" test || exit $?
+          done 2>&1 | tee test-results/ci/workspace-tests.log
+
+      - name: Dashboard upload, image and provider contracts
+        env:
+          NEXT_PUBLIC_BACKEND_PROVIDER: supabase
+        run: bun test --exit --timeout 30000 apps/dashboard/src apps/dashboard/image-loader.test.ts 2>&1 | tee test-results/ci/dashboard-tests.log
+
+      - name: Build dashboard without hosted provider credentials
+        timeout-minutes: 25
+        run: bun run --cwd apps/dashboard build 2>&1 | tee test-results/ci/dashboard-build.log
+
+      - name: Build default Supabase profile without local auth or storage credentials
+        timeout-minutes: 25
+        env:
+          BETTER_AUTH_SECRET: ""
+          STORAGE_ENDPOINT: ""
+          STORAGE_ACCESS_KEY_ID: ""
+          STORAGE_SECRET_ACCESS_KEY: ""
+          NEXT_PUBLIC_SUPABASE_URL: http://localhost:54321
+          NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: build-only-public-key
+          SUPABASE_URL: http://localhost:54321
+          SUPABASE_SECRET_KEY: build-only-server-key
+        run: |
+          unset NEXT_PUBLIC_BACKEND_PROVIDER
+          bun run --cwd apps/dashboard build 2>&1 | tee test-results/ci/supabase-build.log
+
+      - name: Install browser and system dependencies
+        run: bunx playwright install --with-deps chromium
+
+      - name: Local browser end-to-end tests
+        timeout-minutes: 25
+        run: bun run test:e2e:local 2>&1 | tee test-results/ci/browser-tests.log
+
+      - name: Collect service diagnostics on failure
+        if: failure()
+        run: |
+          mkdir -p test-results/ci
+          docker compose ps -a > test-results/ci/compose-status.log
+          docker compose logs --no-color --tail=300 > test-results/ci/compose.log 2>&1
+
+      - name: Upload failure diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-compatibility-${{ github.run_attempt }}
+          retention-days: 7
+          if-no-files-found: ignore
+          path: |
+            test-results/ci/
+            test-results/e2e/
+            test-results/e2e-servers/
+            playwright-report/
+
+      - name: Stop local infrastructure
+        if: always()
+        run: docker compose down --volumes

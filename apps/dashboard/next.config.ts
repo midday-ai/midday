@@ -12,6 +12,10 @@ const config = {
   generateBuildId: () => process.env.GIT_COMMIT_SHA || crypto.randomUUID(),
   deploymentId: process.env.GIT_COMMIT_SHA,
   experimental: {
+    // Bound build worker memory on local machines and smaller CI runners.
+    ...(process.env.NEXT_BUILD_WORKERS
+      ? { cpus: Number(process.env.NEXT_BUILD_WORKERS) }
+      : {}),
     optimizePackageImports: [
       "lucide-react",
       "react-icons",
@@ -28,6 +32,8 @@ const config = {
     loaderFile: "./image-loader.ts",
     qualities: [80, 100],
     remotePatterns: [
+      { protocol: "http", hostname: "localhost" },
+      { protocol: "http", hostname: "127.0.0.1" },
       {
         protocol: "https",
         hostname: "**",
@@ -40,7 +46,7 @@ const config = {
     "@midday/invoice",
     "@midday/api",
   ],
-  serverExternalPackages: ["@react-pdf/renderer", "pino"],
+  serverExternalPackages: ["pg", "@react-pdf/renderer", "pino"],
   typescript: {
     ignoreBuildErrors: true,
   },

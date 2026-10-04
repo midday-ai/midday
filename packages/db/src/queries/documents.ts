@@ -1,7 +1,7 @@
 import { buildSearchQuery } from "@midday/db/utils/search-query";
 import { and, desc, eq, gte, inArray, like, lte, not, sql } from "drizzle-orm";
 import type { SQL } from "drizzle-orm/sql/sql";
-import type { Database } from "../client";
+import type { Database, DatabaseOrTransaction } from "../client";
 import {
   documents,
   documentTagAssignments,
@@ -488,5 +488,60 @@ export async function updateDocumentProcessingStatus(
     .update(documents)
     .set({ processingStatus })
     .where(eq(documents.id, id))
+    .returning({ id: documents.id });
+}
+
+/** Register a vault object synchronously; overwrites preserve document identity/status. */
+export async function upsertDocumentForObject(
+  db: DatabaseOrTransaction,
+  p: {
+    teamId: string;
+    key: string;
+    ownerId?: string | null;
+    size: number;
+    mimetype: string;
+  },
+) {
+  const pathTokens = p.key.split("/");
+  if (
+    pathTokens[0] !== p.teamId ||
+    pathTokens.some((part) => !part || part === "." || part === "..")
+  ) {
+    throw new Error("Document key does not belong to this team");
+  }
+  const metadata = {
+    mimetype: p.mimetype,
+    contentType: p.mimetype,
+    size: p.size,
+  };
+  const [row] = await db
+    .insert(documents)
+    .values({
+      name: p.key,
+      pathTokens,
+      teamId: p.teamId,
+      parentId: pathTokens.length > 1 ? pathTokens.at(-2)! : null,
+      ownerId: p.ownerId ?? null,
+      metadata,
+    })
+    .onConflictDoUpdate({
+      target: [documents.teamId, documents.name],
+      set: { metadata },
+    })
+    .returning({ id: documents.id });
+  return row;
+}
+
+/** Remove document mirrors only within the authenticated tenant. */
+export async function deleteDocumentsByNames(
+  db: DatabaseOrTransaction,
+  p: { teamId: string; names: string[] },
+) {
+  if (!p.names.length) return [];
+  return db
+    .delete(documents)
+    .where(
+      and(eq(documents.teamId, p.teamId), inArray(documents.name, p.names)),
+    )
     .returning({ id: documents.id });
 }

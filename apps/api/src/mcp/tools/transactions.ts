@@ -703,7 +703,7 @@ export const registerTransactionTools: RegisterTools = (server, ctx) => {
               | undefined;
 
             const downloadUrl = jobResult?.fullPath
-              ? await getVaultSignedUrl(jobResult.fullPath)
+              ? await getVaultSignedUrl(jobResult.fullPath, teamId)
               : null;
 
             const response = {
@@ -863,6 +863,7 @@ export const registerTransactionTools: RegisterTools = (server, ctx) => {
           ) {
             const downloadUrl = await getVaultSignedUrl(
               (status.result as Record<string, unknown>).fullPath as string,
+              teamId,
             );
             if (downloadUrl) {
               response.result = {

@@ -1,10 +1,12 @@
 import { setupAnalytics } from "@midday/events/server";
 import { createClient } from "@midday/supabase/server";
+import { isLocalBackend } from "@midday/utils/backend";
 import {
   createSafeActionClient,
   DEFAULT_SERVER_ERROR_MESSAGE,
 } from "next-safe-action";
 import { z } from "zod";
+import { getFreshSession } from "@/lib/auth";
 import { getQueryClient, trpc } from "@/trpc/server";
 import { logger } from "@/utils/logger";
 
@@ -43,7 +45,10 @@ export const authActionClient = actionClientWithMeta
   .use(async ({ next, clientInput, metadata }) => {
     const result = await next({ ctx: {} });
 
-    if (process.env.NODE_ENV === "development") {
+    if (
+      process.env.NODE_ENV === "development" &&
+      metadata.name !== "mfa-verify"
+    ) {
       logger("Input ->", clientInput);
       logger("Result ->", result.data);
       logger("Metadata ->", metadata);
@@ -57,9 +62,13 @@ export const authActionClient = actionClientWithMeta
     const queryClient = getQueryClient();
     const user = await queryClient.fetchQuery(trpc.user.me.queryOptions());
 
-    const supabase = await createClient();
+    const session = isLocalBackend() ? await getFreshSession() : null;
+    const supabase = isLocalBackend() ? null : await createClient();
 
-    if (!user) {
+    if (
+      !user ||
+      (isLocalBackend() && (!session || user.id !== session.user.id))
+    ) {
       throw new Error("Unauthorized");
     }
 
@@ -71,6 +80,7 @@ export const authActionClient = actionClientWithMeta
 
     return next({
       ctx: {
+        session,
         supabase,
         analytics,
         user,

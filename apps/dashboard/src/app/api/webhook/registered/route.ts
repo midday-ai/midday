@@ -2,6 +2,7 @@ import * as crypto from "node:crypto";
 import { LogEvents } from "@midday/events/events";
 import { setupAnalytics } from "@midday/events/server";
 import type { OnboardTeamPayload } from "@midday/jobs/schema";
+import { isLocalBackend } from "@midday/utils/backend";
 import { tasks } from "@trigger.dev/sdk";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
@@ -10,6 +11,7 @@ export const dynamic = "force-dynamic";
 
 // NOTE: This is trigger from supabase database webhook
 export async function POST(req: Request) {
+  if (isLocalBackend()) return new Response("Not found", { status: 404 });
   const text = await req.clone().text();
   const signature = (await headers()).get("x-supabase-signature");
 

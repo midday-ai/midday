@@ -6,10 +6,10 @@ import { useAction } from "next-safe-action/hooks";
 import { unenrollMfaAction } from "@/actions/unenroll-mfa-action";
 
 type Props = {
-  factorId: string;
+  factorId?: string;
 };
 
-export function RemoveMFAButton({ factorId }: Props) {
+export function RemoveMFAButton({ factorId }: Props = {}) {
   const { toast } = useToast();
 
   const unenroll = useAction(unenrollMfaAction, {

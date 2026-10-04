@@ -1,4 +1,5 @@
 import { z } from "@hono/zod-openapi";
+import { isLocalBackend } from "@midday/utils/backend";
 
 export const createShortLinkSchema = z.object({
   url: z.string().url().openapi({
@@ -17,10 +18,19 @@ export const createShortLinkForDocumentSchema = z
       description: "The path to the file in storage",
       example: "team_123/documents/document.pdf",
     }),
-    expireIn: z.number().default(3600).openapi({
-      description: "Expiration time in seconds for the signed URL",
-      example: 3600,
-    }),
+    expireIn: z
+      .number()
+      .int()
+      .min(1)
+      .refine(
+        (seconds) => !isLocalBackend() || seconds <= 604800,
+        "Local storage URLs expire within seven days",
+      )
+      .default(3600)
+      .openapi({
+        description: "Validity of the share link in seconds",
+        example: 3600,
+      }),
   })
   .refine((data) => data.documentId || data.filePath, {
     message: "At least one of documentId or filePath must be provided",

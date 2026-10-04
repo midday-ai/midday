@@ -1,0 +1,28 @@
+{
+  "name": "@midday/storage",
+  "private": true,
+  "exports": {
+    ".": "./src/index.ts",
+    "./keys": "./src/keys.ts",
+    "./client": "./src/client.ts",
+    "./vault": "./src/vault.ts"
+  },
+  "scripts": {
+    "test": "bun test",
+    "typecheck": "tsc --noEmit",
+    "lint": "biome check ."
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "3.1146.0",
+    "@aws-sdk/s3-request-presigner": "3.1146.0",
+    "@aws-sdk/lib-storage": "3.1146.0",
+    "zod": "4.3.6",
+    "@midday/utils": "workspace:*",
+    "@midday/db": "workspace:*",
+    "@midday/supabase": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/bun": "1.3.11",
+    "typescript": "6.0.2"
+  }
+}

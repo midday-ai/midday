@@ -41,9 +41,11 @@ import {
   getTrackerProjectById,
   getTrackerRecordsByRange,
   getUserById,
+  markInvoiceViewed,
   searchInvoiceNumber,
   updateInvoice,
 } from "@midday/db/queries";
+import { decrypt } from "@midday/encryption";
 import { DEFAULT_TEMPLATE } from "@midday/invoice";
 import { verify } from "@midday/invoice/token";
 import { transformCustomerToContent } from "@midday/invoice/utils";
@@ -96,9 +98,24 @@ export const invoiceRouter = createTRPCRouter({
         throw new TRPCError({ code: "NOT_FOUND" });
       }
 
-      return getInvoiceById(db, {
-        id,
-      });
+      const invoice = await getInvoiceById(db, { id });
+      if (invoice && input.viewer?.trim()) {
+        let isCustomerViewer = false;
+        try {
+          isCustomerViewer =
+            decrypt(decodeURIComponent(input.viewer)) ===
+            invoice.customer?.email;
+        } catch {
+          // Invalid viewer hints must not prevent viewing a valid invoice token.
+        }
+        if (isCustomerViewer) {
+          await markInvoiceViewed(db, {
+            id: invoice.id,
+            teamId: invoice.teamId,
+          });
+        }
+      }
+      return invoice;
     }),
 
   paymentStatus: protectedProcedure.query(async ({ ctx: { db, teamId } }) => {

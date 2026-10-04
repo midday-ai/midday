@@ -8,10 +8,12 @@ This directory contains technical documentation for the Midday.
 - **[inbox-matching.md](./inbox-matching.md)** - Detailed documentation of the V2 deterministic inbox matching algorithm with team calibration, hard-negative memory, and read-only verification tooling.
 - **[invoice-recurring.md](./invoice-recurring.md)** - Technical documentation of the recurring invoice system including architecture, state machine, generation flow, and key design decisions.
 - **[document-processing.md](./document-processing.md)** - Technical documentation of the document processing pipeline including AI classification, graceful degradation, retry functionality, and error handling.
-- **[database-connection-pooling.md](./database-connection-pooling.md)** - Database connection pooling setup with Supabase Supavisor (transaction mode), multi-region read replica mapping across Railway, pool configuration, and prepared statement constraints.
+- **[database-connection-pooling.md](./database-connection-pooling.md)** - Database URLs, Supabase and optional PgBouncer pooling, direct local connections, regional replicas, and connection budgets.
 
 ## About
 
 This documentation provides in-depth technical details about core Midday features and algorithms. It's intended for developers working on the codebase who need to understand the implementation details, data flows, and architectural decisions.
 
 The documentation here is kept in sync with the actual implementation and provides more technical depth than the user-facing documentation in the apps/docs directory.
+
+- **[local-development.md](./local-development.md)** - Supabase default and opt-in local setup, authentication, storage, realtime, and troubleshooting.

@@ -1,26 +1,18 @@
 import { getLocationHeaders } from "@midday/location";
-import { createClient } from "@midday/supabase/server";
 import { cookies, headers } from "next/headers";
 import { cache } from "react";
+import { getApiToken } from "@/lib/auth";
 import { Cookies } from "@/utils/constants";
 import { getRequestTraceHeaders } from "@/utils/request-trace";
 
-const getSupabaseClient = cache(createClient);
-
 export const getServerRequestContext = cache(async () => {
-  const [supabase, cookieStore, headersList] = await Promise.all([
-    getSupabaseClient(),
+  const [token, cookieStore, headersList] = await Promise.all([
+    getApiToken(),
     cookies(),
     headers(),
   ]);
 
-  const {
-    data: { session: authSession },
-  } = await supabase.auth.getSession();
-
-  const session = authSession
-    ? { access_token: authSession.access_token }
-    : null;
+  const session = token ? { access_token: token } : null;
 
   return {
     session,

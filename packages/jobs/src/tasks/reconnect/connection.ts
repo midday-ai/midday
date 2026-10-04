@@ -1,7 +1,12 @@
+import { getDb } from "@jobs/init";
 import { reconnectConnectionSchema } from "@jobs/schema";
 import { syncConnection } from "@jobs/tasks/bank/sync/connection";
 import { matchAndUpdateAccountIds } from "@jobs/utils/account-matching";
-import { createClient } from "@midday/supabase/job";
+import {
+  getBankAccountsByConnectionId,
+  getBankConnectionById,
+  updateBankConnectionReferenceId,
+} from "@midday/db/queries";
 import { trpc } from "@midday/trpc";
 import { logger, schemaTask } from "@trigger.dev/sdk";
 
@@ -13,14 +18,13 @@ export const reconnectConnection = schemaTask({
   },
   schema: reconnectConnectionSchema,
   run: async ({ teamId, connectionId, provider }) => {
-    const supabase = createClient();
-
     // Fetch existing bank accounts for this connection
-    const { data: existingAccounts } = await supabase
-      .from("bank_accounts")
-      .select("id, account_reference, iban, type, currency, name")
-      .eq("bank_connection_id", connectionId)
-      .eq("team_id", teamId);
+    const existingAccounts = (
+      await getBankAccountsByConnectionId(getDb(), { connectionId, teamId })
+    ).map((account) => ({
+      ...account,
+      account_reference: account.accountReference,
+    }));
 
     if (!existingAccounts || existingAccounts.length === 0) {
       logger.warn("No existing bank accounts found for connection", {
@@ -46,11 +50,11 @@ export const reconnectConnection = schemaTask({
       // Update the reference_id of the new connection
       if (referenceId) {
         logger.info("Updating reference_id for GoCardless connection");
-        await supabase
-          .from("bank_connections")
-          .update({ reference_id: referenceId })
-          .eq("id", connectionId)
-          .eq("team_id", teamId);
+        await updateBankConnectionReferenceId(getDb(), {
+          id: connectionId,
+          teamId,
+          referenceId,
+        });
       }
 
       // Fetch fresh accounts from GoCardless API
@@ -66,6 +70,7 @@ export const reconnectConnection = schemaTask({
       if (existingAccounts && existingAccounts.length > 0) {
         await matchAndUpdateAccountIds({
           existingAccounts,
+          teamId,
           apiAccounts: accountsResponse.data,
           connectionId,
           provider: "gocardless",
@@ -75,23 +80,21 @@ export const reconnectConnection = schemaTask({
 
     if (provider === "teller") {
       // Get the connection to retrieve access_token and enrollment_id
-      const { data: connectionData } = await supabase
-        .from("bank_connections")
-        .select("access_token, enrollment_id")
-        .eq("id", connectionId)
-        .eq("team_id", teamId)
-        .single();
+      const connectionData = await getBankConnectionById(getDb(), {
+        id: connectionId,
+        teamId,
+      });
 
-      if (!connectionData?.access_token || !connectionData?.enrollment_id) {
+      if (!connectionData?.accessToken || !connectionData?.enrollmentId) {
         logger.error("Teller connection missing access_token or enrollment_id");
         throw new Error("Teller connection not found");
       }
 
       // Fetch fresh accounts from Teller API
       const accountsResponse = await trpc.banking.getProviderAccounts.query({
-        id: connectionData.enrollment_id,
+        id: connectionData.enrollmentId,
         provider: "teller",
-        accessToken: connectionData.access_token,
+        accessToken: connectionData.accessToken,
       });
 
       if (!accountsResponse.data) {
@@ -106,6 +109,7 @@ export const reconnectConnection = schemaTask({
       if (existingAccounts && existingAccounts.length > 0) {
         await matchAndUpdateAccountIds({
           existingAccounts,
+          teamId,
           apiAccounts: accountsResponse.data,
           connectionId,
           provider: "teller",
@@ -115,21 +119,19 @@ export const reconnectConnection = schemaTask({
 
     if (provider === "enablebanking") {
       // Get the connection to retrieve reference_id (session_id)
-      const { data: connectionData } = await supabase
-        .from("bank_connections")
-        .select("reference_id")
-        .eq("id", connectionId)
-        .eq("team_id", teamId)
-        .single();
+      const connectionData = await getBankConnectionById(getDb(), {
+        id: connectionId,
+        teamId,
+      });
 
-      if (!connectionData?.reference_id) {
+      if (!connectionData?.referenceId) {
         logger.error("EnableBanking connection missing reference_id");
         throw new Error("EnableBanking connection not found");
       }
 
       // Fetch fresh accounts from EnableBanking API
       const accountsResponse = await trpc.banking.getProviderAccounts.query({
-        id: connectionData.reference_id,
+        id: connectionData.referenceId,
         provider: "enablebanking",
       });
 
@@ -145,6 +147,7 @@ export const reconnectConnection = schemaTask({
       if (existingAccounts && existingAccounts.length > 0) {
         await matchAndUpdateAccountIds({
           existingAccounts,
+          teamId,
           apiAccounts: accountsResponse.data,
           connectionId,
           provider: "enablebanking",
@@ -160,22 +163,20 @@ export const reconnectConnection = schemaTask({
       });
 
       // We still fetch accounts to verify the connection is working
-      const { data: connectionData } = await supabase
-        .from("bank_connections")
-        .select("access_token, institution_id")
-        .eq("id", connectionId)
-        .eq("team_id", teamId)
-        .single();
+      const connectionData = await getBankConnectionById(getDb(), {
+        id: connectionId,
+        teamId,
+      });
 
-      if (!connectionData?.access_token) {
+      if (!connectionData?.accessToken) {
         logger.error("Plaid connection missing access_token");
         throw new Error("Plaid connection not found");
       }
 
       const accountsResponse = await trpc.banking.getProviderAccounts.query({
         provider: "plaid",
-        accessToken: connectionData.access_token,
-        institutionId: connectionData.institution_id ?? undefined,
+        accessToken: connectionData.accessToken,
+        institutionId: connectionData.institutionId ?? undefined,
       });
 
       if (!accountsResponse.data) {

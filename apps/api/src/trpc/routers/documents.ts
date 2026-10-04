@@ -9,6 +9,7 @@ import {
   signedUrlsSchema,
 } from "@api/schemas/documents";
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
+import { assertStorageTeamKey } from "@api/utils/storage";
 import {
   checkDocumentAttachments,
   deleteDocument,
@@ -20,7 +21,7 @@ import {
 } from "@midday/db/queries";
 import { isMimeTypeSupportedForProcessing } from "@midday/documents/utils";
 import { triggerJob } from "@midday/job-client";
-import { remove, signedUrl } from "@midday/supabase/storage";
+import { createSignedUrl, remove } from "@midday/storage";
 import { TRPCError } from "@trpc/server";
 
 export const documentsRouter = createTRPCRouter({
@@ -66,7 +67,7 @@ export const documentsRouter = createTRPCRouter({
 
   delete: protectedProcedure
     .input(deleteDocumentSchema)
-    .mutation(async ({ input, ctx: { db, supabase, teamId } }) => {
+    .mutation(async ({ input, ctx: { db, teamId } }) => {
       const document = await deleteDocument(db, {
         id: input.id,
         teamId: teamId!,
@@ -80,10 +81,9 @@ export const documentsRouter = createTRPCRouter({
       }
 
       // Delete from storage
-      await remove(supabase, {
-        bucket: "vault",
-        path: document.pathTokens,
-      });
+      await remove("vault", [
+        assertStorageTeamKey(teamId!, document.pathTokens),
+      ]);
 
       return document;
     }),
@@ -91,6 +91,7 @@ export const documentsRouter = createTRPCRouter({
   processDocument: protectedProcedure
     .input(processDocumentSchema)
     .mutation(async ({ ctx: { teamId, db }, input }) => {
+      for (const item of input) assertStorageTeamKey(teamId!, item.filePath);
       const supportedDocuments = input.filter((item) =>
         isMimeTypeSupportedForProcessing(item.mimetype),
       );
@@ -213,31 +214,20 @@ export const documentsRouter = createTRPCRouter({
 
   signedUrl: protectedProcedure
     .input(signedUrlSchema)
-    .mutation(async ({ input, ctx: { supabase } }) => {
-      const { data } = await signedUrl(supabase, {
-        bucket: "vault",
-        path: input.filePath,
-        expireIn: input.expireIn,
-      });
-
-      return data;
+    .mutation(async ({ input, ctx: { teamId } }) => {
+      const key = assertStorageTeamKey(teamId!, input.filePath);
+      return {
+        signedUrl: await createSignedUrl("vault", key, {
+          expiresIn: input.expireIn,
+        }),
+      };
     }),
-
   signedUrls: protectedProcedure
     .input(signedUrlsSchema)
-    .mutation(async ({ input, ctx: { supabase } }) => {
-      const results = await Promise.all(
-        input.map((filePath) =>
-          signedUrl(supabase, {
-            bucket: "vault",
-            path: filePath,
-            expireIn: 60,
-          }),
-        ),
+    .mutation(async ({ input, ctx: { teamId } }) => {
+      const keys = input.map((path) => assertStorageTeamKey(teamId!, path));
+      return Promise.all(
+        keys.map((key) => createSignedUrl("vault", key, { expiresIn: 60 })),
       );
-
-      return results
-        .map((r) => r.data?.signedUrl)
-        .filter((url): url is string => !!url);
     }),
 });

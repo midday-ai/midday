@@ -18,6 +18,7 @@ import * as Sentry from "@sentry/bun";
 import { cors } from "hono/cors";
 import { HTTPException } from "hono/http-exception";
 import { secureHeaders } from "hono/secure-headers";
+import { realtimeListener } from "./realtime/listener";
 import { routers } from "./rest/routers";
 import { wellKnownRouter } from "./rest/routers/well-known";
 import type { Context } from "./rest/types";
@@ -384,6 +385,8 @@ const shutdown = async (signal: string) => {
       if (poolStatsInterval) {
         clearInterval(poolStatsInterval);
       }
+
+      await realtimeListener.close();
 
       logger.info("Closing database connections...");
       await closeDb();

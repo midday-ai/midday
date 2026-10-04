@@ -23,7 +23,7 @@ export function Logo() {
       try {
         const { url } = await uploadFile({
           file,
-          path: [user?.teamId ?? "", "invoice", file.name],
+          path: [user?.teamId ?? "", "invoice"],
           bucket: "avatars",
         });
 

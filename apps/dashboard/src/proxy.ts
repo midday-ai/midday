@@ -1,4 +1,5 @@
 import { updateSession } from "@midday/supabase/middleware";
+import { isLocalBackend } from "@midday/utils/backend";
 import { type NextRequest, NextResponse } from "next/server";
 import { createI18nMiddleware } from "next-international/middleware";
 
@@ -11,6 +12,8 @@ const I18nMiddleware = createI18nMiddleware({
 });
 
 export async function proxy(request: NextRequest) {
+  if (isLocalBackend())
+    return (await import("@/lib/local-auth-proxy")).proxy(request);
   const { response, isAuthenticated, supabase } = await updateSession(
     request,
     I18nMiddleware(request),

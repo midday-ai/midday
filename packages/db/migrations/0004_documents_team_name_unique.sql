@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX "documents_team_id_name_key" ON "documents" USING btree ("team_id","name");

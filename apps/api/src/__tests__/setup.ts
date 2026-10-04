@@ -1,3 +1,7 @@
+process.env.AUTH_JWKS_URL ||= "http://localhost:3001/api/auth/jwks";
+process.env.AUTH_JWT_ISSUER ||= "http://localhost:3001";
+process.env.AUTH_JWT_AUDIENCE ||= "midday-api";
+
 import { mock } from "bun:test";
 
 // Set required environment variables BEFORE any mock.module calls
@@ -87,6 +91,14 @@ export function asMock(fn: (...args: any[]) => any): MockFn {
 
 // Create reusable mock functions that tests can access
 export const mocks = {
+  verifyInvoiceToken: mock(() => ({
+    id: "invoice-123",
+    teamId: "test-team-id",
+  })) as MockFn,
+  markInvoiceViewed: mock(() =>
+    Promise.resolve({ id: "invoice-123" }),
+  ) as MockFn,
+  updateBankConnectionExpiry: mock(() => Promise.resolve(undefined)) as MockFn,
   // Transaction queries
   getTransactions: mock(() => ({
     data: [],
@@ -776,10 +788,25 @@ export const mocks = {
   // Other commonly used queries
   validateAccessToken: mock(() => null) as MockFn,
   triggerJob: mock(() => ({ id: "job-123" })) as MockFn,
-  signedUrl: mock(() => ({
-    data: { signedUrl: "https://example.com/signed" },
-    error: null,
-  })) as MockFn,
+  signedUrl: mock(() =>
+    Promise.resolve("https://example.com/signed"),
+  ) as MockFn,
+  createSignedUploadUrl: mock(() =>
+    Promise.resolve({
+      url: "http://localhost:9000/upload",
+      method: "PUT",
+      headers: { "Content-Type": "application/pdf" },
+    }),
+  ) as MockFn,
+  storageHead: mock(() => Promise.resolve(null)) as MockFn,
+  storagePublicUrl: mock(
+    (bucket: string, key: string) => `http://localhost:9000/${bucket}/${key}`,
+  ) as MockFn,
+  upsertDocumentForObject: mock(() =>
+    Promise.resolve({ id: "document-id" }),
+  ) as MockFn,
+  removeStorage: mock(() => Promise.resolve()) as MockFn,
+  deleteDocumentsByNames: mock(() => Promise.resolve([])) as MockFn,
   formatAmountValue: mock(
     ({ amount }: { amount: string }) => Number.parseFloat(amount) || 0,
   ) as MockFn,
@@ -821,6 +848,8 @@ const dbQueriesMock = new Proxy(
     // Invoice functions
     getInvoices: mocks.getInvoices,
     getInvoiceById: mocks.getInvoiceById,
+    markInvoiceViewed: mocks.markInvoiceViewed,
+    updateBankConnectionExpiry: mocks.updateBankConnectionExpiry,
     createInvoice: mocks.createInvoice,
     updateInvoice: mocks.updateInvoice,
     deleteInvoice: mocks.deleteInvoice,
@@ -906,6 +935,8 @@ const dbQueriesMock = new Proxy(
     createInbox: mocks.createInbox,
     updateInbox: mocks.updateInbox,
     deleteInbox: mocks.deleteInbox,
+    deleteDocumentsByNames: mocks.deleteDocumentsByNames,
+    upsertDocumentForObject: mocks.upsertDocumentForObject,
     deleteInboxMany: mocks.deleteInboxMany,
     getInboxByStatus: mocks.getInboxByStatus,
     getInboxSearch: mocks.getInboxSearch,
@@ -1174,13 +1205,16 @@ mock.module("@midday/cache/api-key-cache", () => ({
   },
 }));
 
-// Mock @midday/supabase/storage
-mock.module("@midday/supabase/storage", () => ({
-  signedUrl: mocks.signedUrl,
-  remove: mock(() => Promise.resolve({ error: null })),
-  download: mock(() =>
-    Promise.resolve({ data: null, error: new Error("not used in tests") }),
-  ),
+// Mock server storage while keeping key authorization real.
+mock.module("@midday/storage", () => ({
+  createSignedUrl: mocks.signedUrl,
+  createSignedUploadUrl: mocks.createSignedUploadUrl,
+  head: mocks.storageHead,
+  getPublicUrl: mocks.storagePublicUrl,
+  remove: mocks.removeStorage,
+  download: mock(() => Promise.resolve(null)),
+  getStream: mock(() => Promise.resolve(null)),
+  checkStorageHealth: mock(() => Promise.resolve()),
 }));
 
 // Mock @midday/job-client
@@ -1261,7 +1295,7 @@ mock.module("@midday/invoice/utils", () => ({
 }));
 
 mock.module("@midday/invoice/token", () => ({
-  verify: mock(() => ({ id: "invoice-123", teamId: "test-team-id" })),
+  verify: mocks.verifyInvoiceToken,
 }));
 
 mock.module("@midday/invoice", () => ({
@@ -1279,7 +1313,6 @@ mock.module("@midday/invoice", () => ({
   ),
 }));
 
-// Mock @api/services/supabase
 mock.module("@api/services/supabase", () => ({
   createClient: mock(async () => ({})),
   createAdminClient: mock(async () => ({
@@ -1290,6 +1323,12 @@ mock.module("@api/services/supabase", () => ({
       },
     },
   })),
+}));
+
+mock.module("@api/services/storage", () => ({
+  uploadVaultObject: mock(() =>
+    Promise.resolve({ path: "test-team-id/inbox/file.pdf" }),
+  ),
 }));
 
 mock.module("@api/services/resend", () => ({
@@ -1341,10 +1380,7 @@ mock.module("@api/utils/auth", () => ({
     user: {
       id: "test-user-id",
       email: "test@example.com",
-      user_metadata: {},
-      app_metadata: {},
-      aud: "authenticated",
-      created_at: new Date().toISOString(),
+      full_name: "Test User",
     },
     access_token: "test-access-token",
     token_type: "bearer",

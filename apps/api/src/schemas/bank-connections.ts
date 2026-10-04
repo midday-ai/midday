@@ -80,3 +80,9 @@ export const reconnectBankConnectionSchema = z.object({
   newReferenceId: z.string(),
   expiresAt: z.string(),
 });
+
+export const updateBankConnectionReconnectSchema = z.object({
+  id: z.string().uuid(),
+  referenceId: z.string().min(1).optional(),
+  accessValidForDays: z.number().int().min(1).max(730).default(180),
+});

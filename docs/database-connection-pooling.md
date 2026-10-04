@@ -1,83 +1,47 @@
-# Database Connection Pooling
+# Database connection pooling
 
-Technical documentation for the database connection setup across Supabase and Railway.
+Both backend profiles use Postgres through Drizzle. Supabase is the default. `NEXT_PUBLIC_BACKEND_PROVIDER=local` selects the separate local database, better-auth, S3, and SSE stack; the selector does not rewrite database URLs.
 
-## Overview
+## Connection URLs
 
-The application connects to Supabase Postgres through **Supavisor** (Supabase's shared connection pooler) in **transaction mode**. Each Railway region's API instance reads from the closest Supabase read replica and writes to the primary database in EU.
+| Variable | Purpose |
+| --- | --- |
+| `DATABASE_PRIMARY_URL` | API/dashboard primary reads and writes. Ordinary queries may use a compatible pooler. |
+| `DATABASE_PRIMARY_POOLER_URL` | Worker and Trigger.dev jobs. The worker falls back to the primary URL; configure this explicitly for jobs. |
+| `DATABASE_FRA_URL`, `DATABASE_IAD_URL`, `DATABASE_SJC_URL` | Optional regional read replicas selected by `RAILWAY_REPLICA_REGION`. |
+| `DATABASE_MIGRATION_URL` | Direct connection for local migrations and advisory locks; falls back to the primary URL. Never target the Supabase schema with the local baseline. |
+| `DATABASE_LISTEN_URL` | Direct local Postgres connection for realtime LISTEN/NOTIFY. Transaction pooling cannot preserve this session. |
+| `DATABASE_SSL` | `disable`, certificate-verified `require`, or `no-verify`. |
 
-## Connection Modes
+Local Compose uses `postgresql://postgres:postgres@localhost:5432/midday` for each database connection with `DATABASE_SSL=disable`. No pooler is needed locally. When SSL is unset, development disables TLS; other environments enable TLS without certificate verification. Set this explicitly for deployments.
 
-Supabase offers two pooling modes via `pooler.supabase.com`:
+## Supabase and optional poolers
 
-| Mode | Port | Behavior |
-|------|------|----------|
-| **Session mode** | `5432` | 1:1 client-to-backend mapping. No real pooling — each app connection holds a dedicated Postgres connection for its entire lifetime. |
-| **Transaction mode** | `6543` | Real connection pooling. Backend connections are shared between clients and only held during a transaction, then returned to the pool. |
+Existing Supabase deployments retain their project connection URLs and schema. Supavisor transaction mode or PgBouncer can reduce server connection pressure for ordinary API/worker/job queries. Advisory migration locks and LISTEN need direct connections; Supabase realtime uses channels instead of local LISTEN.
 
-**We use transaction mode (port 6543).** This is critical — session mode on port 5432 provides zero pooling benefit despite routing through `pooler.supabase.com`.
+The local baseline must never run against Supabase. The project's existing migrations, auth schema, RLS, and storage triggers remain authoritative.
 
-### Connection String Format
+## Regional reads
 
-```
-postgresql://postgres.<project-ref>:<password>@aws-0-<region>.pooler.supabase.com:6543/postgres
-```
+| `RAILWAY_REPLICA_REGION` | Read replica |
+| --- | --- |
+| `europe-west4-drams3a` | `DATABASE_FRA_URL` |
+| `us-east4-eqdc4a` | `DATABASE_IAD_URL` |
+| `us-west2` | `DATABASE_SJC_URL` |
 
-## Dedicated Pooler (PgBouncer)
+An unset replica, unknown region, or replica URL equal to the primary reuses the primary pool. A distinct replica creates a second pool. Writes always use the primary.
 
-Supabase also offers a dedicated PgBouncer co-located on the database machine at `db.<ref>.supabase.co:6543`. This has lower latency (no network hop to a separate server) but requires IPv6 connectivity or the Supabase IPv4 add-on ($4/mo per database).
+## Pool sizes and budgeting
 
-Railway does **not** support IPv6 to Supabase's direct endpoints, so the shared Supavisor pooler is the correct choice for our infrastructure.
+These values come from `packages/db/src/client.ts`, `worker-client.ts`, and `job-client.ts`.
 
-## Multi-Region Replica Mapping
+| Client | Development maximum / minimum | Production maximum / minimum | Other environments |
+| --- | --- | --- | --- |
+| API/dashboard primary | 8 / 0 | 40 / 8 | 6 / 1 |
+| API/dashboard distinct replica | 8 / 0 | 40 / 8 | 6 / 1 |
+| Worker | 10 / default | 50 / default | 50 / default |
+| Trigger.dev job | 1 / default | 1 / default | 1 / default |
 
-The API runs in 3 Railway regions. Each instance reads from the closest Supabase read replica via the `RAILWAY_REPLICA_REGION` environment variable:
+API/dashboard production is detected by `RAILWAY_ENVIRONMENT_NAME=production`, and development by `NODE_ENV=development`. Each worker owns its pool. Each Trigger.dev job creates a single-connection pool and must disconnect it afterward.
 
-| Railway Region | Env Var | Supabase Region | Role |
-|----------------|---------|-----------------|------|
-| `europe-west4-drams3a` | `DATABASE_FRA_URL` | `eu-central-1` | Primary (reads + writes) |
-| `us-east4-eqdc4a` | `DATABASE_IAD_URL` | `us-east-1` | Read replica |
-| `us-west2` | `DATABASE_SJC_URL` | `us-west-1` | Read replica |
-
-- **Reads** are routed to the regional replica via `executeOnReplica` and the `withReplicas` wrapper in `packages/db/src/replicas.ts`.
-- **Writes** always go to `DATABASE_PRIMARY_URL` (the primary in `eu-central-1`).
-
-## Pool Configuration
-
-Defined in `packages/db/src/client.ts`:
-
-| Setting | Development | Production |
-|---------|-------------|------------|
-| `max` | 8 | 40 |
-| `idleTimeoutMillis` | 5,000ms | 60,000ms |
-| `connectionTimeoutMillis` | 5,000ms | 5,000ms |
-| `maxUses` | 100 | 0 (unlimited) |
-| `ssl` | disabled | enabled (rejectUnauthorized: false) |
-
-Each API instance creates up to 2 pools (primary + 1 regional replica), so the maximum client connections per instance is `40 × 2 = 80`. With Supavisor transaction mode, these are multiplexed into a much smaller number of actual Postgres backend connections. Pool sizes are tuned for PgBouncer's 600 client limit across API + worker instances.
-
-## Prepared Statements
-
-We use **pg** (node-postgres) for all database clients. Transaction mode (port 6543) does **not** support prepared statements — use **session pooler** (port 5432) or **direct connection** for pg compatibility.
-
-See [Supabase: Disabling prepared statements](https://github.com/orgs/supabase/discussions/28239).
-
-## Environment Variables
-
-### API Service
-- `DATABASE_PRIMARY_URL` — Primary database (EU, writes + reads)
-- `DATABASE_FRA_URL` — EU read replica (same as primary)
-- `DATABASE_IAD_URL` — US East read replica
-- `DATABASE_SJC_URL` — US West read replica
-
-### Worker Service
-- `DATABASE_PRIMARY_POOLER_URL` — Primary database (EU)
-
-### Dashboard Service
-- No database variables — connects to the API via tRPC, not directly to Postgres.
-
-## Railway Deploy Configuration
-
-- **API**: 3 regions × 1 replica each (production), 3 regions × 1 replica each (staging)
-- **Dashboard**: 3 regions × 2 replicas each (production), 3 regions × 1 replica each (staging, with serverless/sleep enabled)
-- **Worker**: 1 region (EU) × 3 replicas (production)
+Budget against Postgres `max_connections` across all application instances: primary and replica pools, workers, concurrent jobs, dedicated LISTEN connections, and room for administration/migrations. Local Compose allows 200 connections. A transaction pooler's server limits are separate from application client pool sizes; monitor both.

@@ -1,6 +1,7 @@
 import { getDb } from "@jobs/init";
 import { processBatch } from "@jobs/utils/process-batch";
 import {
+  getExistingInboxAttachmentsByReferenceIds,
   getInboxAccountInfo,
   getInboxBlocklist,
   updateInboxAccount,
@@ -12,8 +13,8 @@ import {
   InboxSyncError,
   isInboxAuthError,
 } from "@midday/inbox/errors";
-import { createClient } from "@midday/supabase/job";
-import { getExistingInboxAttachmentsQuery } from "@midday/supabase/queries";
+import { uploadVaultObject } from "@midday/storage/vault";
+
 import { ensureFileExtension } from "@midday/utils";
 import { logger, schemaTask, tasks } from "@trigger.dev/sdk";
 import { z } from "zod";
@@ -44,8 +45,6 @@ export const syncInboxAccount = schemaTask({
   },
   run: async (payload) => {
     const { id, manualSync = false } = payload;
-
-    const supabase = createClient();
 
     if (!id) {
       throw new Error("id is required");
@@ -90,10 +89,11 @@ export const syncInboxAccount = schemaTask({
       });
 
       // Filter out attachments that are already processed
-      const existingAttachments = await getExistingInboxAttachmentsQuery(
-        supabase,
-        attachments.map((attachment) => attachment.referenceId),
-      );
+      const existingAttachments =
+        await getExistingInboxAttachmentsByReferenceIds(getDb(), {
+          teamId: accountRow.teamId,
+          referenceIds: attachments.map((attachment) => attachment.referenceId),
+        });
 
       // Get blocklist entries for the team
       const blocklistEntries = await getInboxBlocklist(getDb(), {
@@ -112,9 +112,8 @@ export const syncInboxAccount = schemaTask({
       const filteredAttachments = attachments.filter((attachment) => {
         // Skip if already exists in database
         if (
-          existingAttachments.data?.some(
-            (existing: { reference_id: string | null }) =>
-              existing.reference_id === attachment.referenceId,
+          existingAttachments.some(
+            (existing) => existing.referenceId === attachment.referenceId,
           )
         ) {
           skippedAlreadyProcessed++;
@@ -203,12 +202,12 @@ export const syncInboxAccount = schemaTask({
               item.mimeType,
             );
 
-            const { data: uploadData } = await supabase.storage
-              .from("vault")
-              .upload(`${accountRow.teamId}/inbox/${safeFilename}`, item.data, {
-                contentType: item.mimeType,
-                upsert: true,
-              });
+            const uploadData = await uploadVaultObject(getDb(), {
+              teamId: accountRow.teamId,
+              key: `${accountRow.teamId}/inbox/${safeFilename}`,
+              body: item.data,
+              contentType: item.mimeType,
+            }).catch(() => null);
 
             if (uploadData) {
               results.push({

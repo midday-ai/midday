@@ -1,7 +1,9 @@
 import { updateTransaction } from "@midday/db/queries";
 import { DocumentClient } from "@midday/documents";
 import { triggerJob } from "@midday/job-client";
-import { createClient } from "@midday/supabase/job";
+import { createSignedUrl, download } from "@midday/storage";
+import { assertTeamKey } from "@midday/storage/keys";
+import { uploadVaultObject } from "@midday/storage/vault";
 import type { Job } from "bullmq";
 import type { ProcessTransactionAttachmentPayload } from "../../schemas/transactions";
 import { getDb } from "../../utils/db";
@@ -15,7 +17,6 @@ import { BaseProcessor } from "../base";
 export class ProcessTransactionAttachmentProcessor extends BaseProcessor<ProcessTransactionAttachmentPayload> {
   async process(job: Job<ProcessTransactionAttachmentPayload>): Promise<void> {
     const { transactionId, mimetype, filePath, teamId } = job.data;
-    const supabase = createClient();
 
     this.logger.info("Processing transaction attachment", {
       transactionId,
@@ -30,9 +31,10 @@ export class ProcessTransactionAttachmentProcessor extends BaseProcessor<Process
         filePath: filePath.join("/"),
       });
 
-      const { data } = await supabase.storage
-        .from("vault")
-        .download(filePath.join("/"));
+      const data = await download(
+        "vault",
+        assertTeamKey(teamId, filePath.join("/")),
+      );
 
       if (!data) {
         throw new Error("File not found");
@@ -44,12 +46,12 @@ export class ProcessTransactionAttachmentProcessor extends BaseProcessor<Process
       const { buffer: image } = await convertHeicToJpeg(buffer, this.logger);
 
       // Upload the converted image
-      const { data: uploadedData } = await supabase.storage
-        .from("vault")
-        .upload(filePath.join("/"), image, {
-          contentType: "image/jpeg",
-          upsert: true,
-        });
+      const uploadedData = await uploadVaultObject(getDb(), {
+        teamId: teamId,
+        key: filePath.join("/"),
+        body: image,
+        contentType: "image/jpeg",
+      });
 
       if (!uploadedData) {
         throw new Error("Failed to upload converted image");
@@ -60,9 +62,11 @@ export class ProcessTransactionAttachmentProcessor extends BaseProcessor<Process
 
     // Use 10 minutes expiration to ensure URL doesn't expire during processing
     // (document processing can take up to 120s, plus buffer for retries)
-    const { data: signedUrlData } = await supabase.storage
-      .from("vault")
-      .createSignedUrl(filePath.join("/"), 600);
+    const signedUrlData = await createSignedUrl(
+      "vault",
+      assertTeamKey(teamId, filePath.join("/")),
+      { expiresIn: 600 },
+    );
 
     if (!signedUrlData) {
       throw new Error("File not found");
@@ -77,7 +81,7 @@ export class ProcessTransactionAttachmentProcessor extends BaseProcessor<Process
     });
 
     const result = await document.getInvoiceOrReceipt({
-      documentUrl: signedUrlData.signedUrl,
+      documentUrl: signedUrlData,
       mimetype,
     });
 

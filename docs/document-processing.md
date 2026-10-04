@@ -15,6 +15,10 @@ The Document Processing Pipeline automatically processes files uploaded to the V
 - **🔐 Job Deduplication**: Prevents duplicate processing using deterministic job IDs
 - **📊 Status Tracking**: Real-time visual feedback for processing, failed, and completed states
 
+## Backend profiles
+
+The architecture below retains the Supabase storage-trigger flow used by the default backend. With `NEXT_PUBLIC_BACKEND_PROVIDER=local`, server uploads use `uploadVaultObject`, and browser uploads finish through `storage.completeUploads`; both register vault objects through `upsertDocumentForObject`. The local database has no Supabase storage trigger. Processing jobs consume registered documents in either profile.
+
 ## Architecture
 
 ```mermaid

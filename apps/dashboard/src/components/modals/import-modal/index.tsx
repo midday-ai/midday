@@ -13,7 +13,6 @@ import {
 import { Icons } from "@midday/ui/icons";
 import { SubmitButtonMorph } from "@midday/ui/submit-button-morph";
 import { useToast } from "@midday/ui/use-toast";
-import { stripSpecialCharacters } from "@midday/utils";
 import { useOpenPanel } from "@openpanel/nextjs";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { parseAsBoolean, parseAsString, useQueryStates } from "nuqs";
@@ -388,10 +387,9 @@ export function ImportModal() {
 
                       setIsImporting(true);
 
-                      const filename = stripSpecialCharacters(data.file.name);
                       const { path } = await uploadFile({
                         bucket: "vault",
-                        path: [user?.team?.id ?? "", "imports", filename],
+                        path: [user?.team?.id ?? "", "imports"],
                         file,
                       });
 

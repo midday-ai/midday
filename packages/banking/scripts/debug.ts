@@ -13,6 +13,11 @@
  * Requires DATABASE_PRIMARY_URL + provider API credentials in your environment.
  */
 
+import {
+  type ApiAccount,
+  type DbAccount,
+  findMatchingAccount,
+} from "@midday/banking/account-matching";
 import { primaryDb as db } from "@midday/db/client";
 import {
   bankAccounts,
@@ -20,11 +25,6 @@ import {
   transactions as transactionsTable,
 } from "@midday/db/schema";
 import { setLogLevel } from "@midday/logger";
-import {
-  type ApiAccount,
-  type DbAccount,
-  findMatchingAccount,
-} from "@midday/supabase/account-matching";
 import { and, desc, eq } from "drizzle-orm";
 import { Provider } from "../src/index";
 import { EnableBankingApi } from "../src/providers/enablebanking/enablebanking-api";

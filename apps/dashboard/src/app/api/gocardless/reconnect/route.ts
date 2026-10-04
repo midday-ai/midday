@@ -1,20 +1,16 @@
-import { getSession } from "@midday/supabase/cached-queries";
-import { updateBankConnection } from "@midday/supabase/mutations";
-import { createClient } from "@midday/supabase/server";
 import { type NextRequest, NextResponse } from "next/server";
+import { getSession } from "@/lib/auth";
+import { getTRPCClient } from "@/trpc/server";
 import { getUrl } from "@/utils/environment";
 
 export async function GET(req: NextRequest) {
   const origin = getUrl();
-  const {
-    data: { session },
-  } = await getSession();
+  const session = await getSession();
 
   if (!session) {
     return NextResponse.redirect(new URL("/", origin));
   }
 
-  const supabase = await createClient();
   const requestUrl = new URL(req.url);
   const id = requestUrl.searchParams.get("id");
   const referenceId = requestUrl.searchParams.get("reference_id") ?? undefined;
@@ -24,7 +20,7 @@ export async function GET(req: NextRequest) {
   const isDesktop = requestUrl.searchParams.get("desktop");
 
   if (id) {
-    await updateBankConnection(supabase, {
+    await (await getTRPCClient()).bankConnections.updateReconnect.mutate({
       id,
       referenceId,
       accessValidForDays: accessValidForDays || 180,

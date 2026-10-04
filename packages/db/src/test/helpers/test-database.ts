@@ -47,7 +47,11 @@ export async function cleanDatabase(): Promise<void> {
       inbox,
       reports,
       teams,
-      users
+      users,
+      auth_users,
+      auth_verifications,
+      auth_rate_limits,
+      auth_jwks
     CASCADE
   `);
 }

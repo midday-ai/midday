@@ -1,8 +1,7 @@
 import { getDb } from "@jobs/init";
+import { markTransactionsNotified } from "@midday/db/queries";
 import { Notifications } from "@midday/notifications";
-import { createClient } from "@midday/supabase/job";
 import { logger, schemaTask } from "@trigger.dev/sdk";
-import { parseISO } from "date-fns";
 import { z } from "zod";
 
 export const transactionNotifications = schemaTask({
@@ -13,24 +12,12 @@ export const transactionNotifications = schemaTask({
     teamId: z.string(),
   }),
   run: async ({ teamId }) => {
-    const supabase = createClient();
     const db = getDb();
     const notifications = new Notifications(db);
 
     try {
       // Update all unnotified transactions for the team as notified and return those transactions
-      const { data: transactionsData } = await supabase
-        .from("transactions")
-        .update({ notified: true })
-        .eq("team_id", teamId)
-        .eq("notified", false)
-        .select("id, date, amount, name, currency, category, status")
-        .order("date", { ascending: false })
-        .throwOnError();
-
-      const sortedTransactions = transactionsData?.sort((a, b) => {
-        return parseISO(b.date).getTime() - parseISO(a.date).getTime();
-      });
+      const sortedTransactions = await markTransactionsNotified(db, { teamId });
 
       if (sortedTransactions && sortedTransactions.length > 0) {
         const transactions = sortedTransactions.map((transaction) => ({

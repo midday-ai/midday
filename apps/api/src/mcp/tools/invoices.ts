@@ -33,6 +33,7 @@ import { DEFAULT_TEMPLATE, PdfTemplate, renderToStream } from "@midday/invoice";
 import { calculateTotal } from "@midday/invoice/calculate";
 import { transformCustomerToContent } from "@midday/invoice/utils";
 import { triggerJob } from "@midday/job-client";
+import { isLocalBackend } from "@midday/utils/backend";
 import { registerAppTool } from "@modelcontextprotocol/ext-apps/server";
 import { addDays } from "date-fns";
 import { v4 as uuidv4 } from "uuid";
@@ -60,7 +61,18 @@ import {
 } from "../utils";
 
 function isAllowedLogoUrl(url: string): boolean {
-  return url.startsWith("https://service.midday.ai/");
+  return [
+    ...(!isLocalBackend()
+      ? [
+          "https://service.midday.ai",
+          `${process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL || ""}/storage/v1/object/public/avatars`,
+        ]
+      : []),
+    process.env.STORAGE_PUBLIC_URL_AVATARS,
+    process.env.LEGACY_PUBLIC_STORAGE_URL,
+  ]
+    .filter((base): base is string => Boolean(base))
+    .some((base) => url.startsWith(`${base.replace(/\/+$/, "")}/`));
 }
 
 async function embedLogoAsDataUrl(

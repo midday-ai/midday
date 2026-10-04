@@ -3,7 +3,8 @@ import { processDocumentSchema } from "@jobs/schema";
 import { updateDocumentByPath } from "@midday/db/queries";
 import { loadDocument } from "@midday/documents/loader";
 import { getContentSample } from "@midday/documents/utils";
-import { createClient } from "@midday/supabase/job";
+import { download } from "@midday/storage";
+import { assertTeamKey } from "@midday/storage/keys";
 import { schemaTask, tasks } from "@trigger.dev/sdk";
 import { classifyDocument } from "./classify-document";
 import { classifyImage } from "./classify-image";
@@ -18,8 +19,6 @@ export const processDocument = schemaTask({
     concurrencyLimit: 50,
   },
   run: async ({ mimetype, filePath, teamId }) => {
-    const supabase = createClient();
-
     // Create activity for document upload
     await tasks.trigger("notification", {
       type: "document_uploaded",
@@ -47,9 +46,10 @@ export const processDocument = schemaTask({
         return;
       }
 
-      const { data: fileData } = await supabase.storage
-        .from("vault")
-        .download(filePath.join("/"));
+      const fileData = await download(
+        "vault",
+        assertTeamKey(teamId, filePath.join("/")),
+      );
 
       if (!fileData) {
         throw new Error("File not found");

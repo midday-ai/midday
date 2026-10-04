@@ -12,8 +12,8 @@
   "dependencies": {
     "@slack/bolt": "^4.6.0",
     "@slack/web-api": "^7.15.0",
-    "@supabase/supabase-js": "^2.101.1",
-    "zod": "catalog:"
+    "zod": "catalog:",
+    "@midday/db": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^25.5.0",

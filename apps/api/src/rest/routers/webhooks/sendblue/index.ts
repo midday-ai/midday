@@ -8,8 +8,12 @@ const app = new OpenAPIHono<Context>();
 registerMiddayBotRuntime();
 
 app.post("/", async (c) => {
+  const webhook = bot.webhooks.sendblue;
+  if (!webhook) {
+    return c.json({ error: "Sendblue integration is not configured" }, 503);
+  }
   await bot.initialize();
-  return bot.webhooks.sendblue(c.req.raw);
+  return webhook(c.req.raw);
 });
 
 export const sendblueWebhookRouter = app;

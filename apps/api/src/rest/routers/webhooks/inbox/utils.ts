@@ -1,7 +1,8 @@
+import { uploadVaultObject } from "@api/services/storage";
+import type { Database } from "@midday/db/client";
 import { triggerJob } from "@midday/job-client";
 import { logger } from "@midday/logger";
 import { getExtensionFromMimeType } from "@midday/utils";
-import type { SupabaseClient } from "@supabase/supabase-js";
 import { nanoid } from "nanoid";
 
 // Constants
@@ -70,11 +71,11 @@ export function filterAttachments(
 }
 
 /**
- * Upload a single attachment to Supabase storage
+ * Upload and register a single vault attachment
  * Returns null if upload fails
  */
 export async function uploadAttachment(
-  supabase: SupabaseClient,
+  db: Database,
   teamId: string,
   attachment: InboxAttachment,
   senderEmail: string | null,
@@ -87,27 +88,12 @@ export async function uploadAttachment(
       attachment.ContentType,
     );
 
-    const { data, error } = await supabase.storage
-      .from("vault")
-      .upload(
-        `${teamId}/inbox/${uniqueFileName}`,
-        Buffer.from(attachment.Content, "base64"),
-        {
-          contentType: attachment.ContentType,
-          upsert: true,
-        },
-      );
-
-    if (error || !data?.path) {
-      logger.error("Failed to upload attachment", {
-        fileName: attachment.Name,
-        teamId,
-        error: error?.message,
-        size: attachment.ContentLength,
-      });
-
-      return null;
-    }
+    const data = await uploadVaultObject(db, {
+      teamId,
+      key: `${teamId}/inbox/${uniqueFileName}`,
+      body: Buffer.from(attachment.Content, "base64"),
+      contentType: attachment.ContentType,
+    });
 
     return {
       display_name: subject || attachment.Name,

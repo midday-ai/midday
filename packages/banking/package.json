@@ -14,7 +14,8 @@
     ".": "./src/index.ts",
     "./account": "./src/utils/account.ts",
     "./rates": "./src/utils/rates.ts",
-    "./gocardless/utils": "./src/providers/gocardless/utils.ts"
+    "./gocardless/utils": "./src/providers/gocardless/utils.ts",
+    "./account-matching": "./src/utils/account-matching.ts"
   },
   "dependencies": {
     "@midday/cache": "workspace:*",

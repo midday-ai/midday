@@ -743,6 +743,7 @@ export const duplicateInvoiceSchema = z.object({
 
 export const getInvoiceByTokenSchema = z.object({
   token: z.string(),
+  viewer: z.string().optional(),
 });
 
 // Template schema alias for compatibility

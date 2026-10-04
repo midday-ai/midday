@@ -121,7 +121,7 @@ export const registerDocumentTools: RegisterTools = (server, ctx) => {
           : null;
 
         const fileUrl = storagePath
-          ? await getVaultSignedUrl(storagePath)
+          ? await getVaultSignedUrl(storagePath, teamId)
           : null;
 
         const clean = sanitize(mcpDocumentSchema, { ...result, fileUrl });
@@ -139,6 +139,7 @@ export const registerDocumentTools: RegisterTools = (server, ctx) => {
               storagePath,
               fileUrl,
               getMimeType(result.name!),
+              teamId,
             );
             if (resource) content.push(resource);
           } catch {

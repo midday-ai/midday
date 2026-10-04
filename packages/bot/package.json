@@ -27,7 +27,8 @@
     "@midday/supabase": "workspace:*",
     "@midday/utils": "workspace:*",
     "chat": "^4.23.0",
-    "nanoid": "catalog:"
+    "nanoid": "catalog:",
+    "@midday/storage": "workspace:*"
   },
   "devDependencies": {
     "@midday/tsconfig": "workspace:*",

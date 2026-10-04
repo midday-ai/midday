@@ -8,12 +8,14 @@ import {
   protectedProcedure,
   publicProcedure,
 } from "@api/trpc/init";
+import { assertStorageTeamKey } from "@api/utils/storage";
 import {
   createShortLink,
   getDocumentById,
   getShortLinkByShortId,
 } from "@midday/db/queries";
-import { signedUrl } from "@midday/supabase/storage";
+import { createSignedUrl } from "@midday/storage";
+import { isLocalBackend } from "@midday/utils/backend";
 
 export const shortLinksRouter = createTRPCRouter({
   createForUrl: protectedProcedure
@@ -38,7 +40,7 @@ export const shortLinksRouter = createTRPCRouter({
 
   createForDocument: protectedProcedure
     .input(createShortLinkForDocumentSchema)
-    .mutation(async ({ ctx: { db, teamId, session, supabase }, input }) => {
+    .mutation(async ({ ctx: { db, teamId, session }, input }) => {
       const document = await getDocumentById(db, {
         id: input.documentId,
         filePath: input.filePath,
@@ -49,23 +51,19 @@ export const shortLinksRouter = createTRPCRouter({
         throw new Error("Document not found");
       }
 
-      // First create the signed URL for the file
-      const response = await signedUrl(supabase, {
-        bucket: "vault",
-        path: document.pathTokens?.join("/") ?? "",
-        expireIn: input.expireIn,
-        options: {
-          download: true,
-        },
+      // Return a short-lived direct URL for callers, but persist only the object key.
+      const key = assertStorageTeamKey(teamId!, document.pathTokens ?? []);
+      const url = await createSignedUrl("vault", key, {
+        expiresIn: isLocalBackend() ? 60 : input.expireIn,
+        download: true,
       });
 
-      if (!response.data?.signedUrl) {
-        throw new Error("Failed to create signed URL for file");
-      }
-
-      // Then create a short link for the signed URL
+      // The short link owns its expiry; each resolution creates a fresh signature.
       const result = await createShortLink(db, {
-        url: response.data.signedUrl,
+        url: isLocalBackend() ? `storage://vault/${key}` : url,
+        ...(isLocalBackend()
+          ? { bucket: "vault" as const, objectKey: key }
+          : {}),
         teamId: teamId!,
         userId: session.user.id,
         type: "download",
@@ -86,13 +84,26 @@ export const shortLinksRouter = createTRPCRouter({
       return {
         ...result,
         shortUrl: `${process.env.MIDDAY_DASHBOARD_URL}/s/${result.shortId}`,
-        originalUrl: response.data.signedUrl,
+        originalUrl: url,
       };
     }),
 
   get: publicProcedure
     .input(getShortLinkSchema)
     .query(async ({ ctx: { db }, input }) => {
-      return getShortLinkByShortId(db, input.shortId);
+      const link = await getShortLinkByShortId(db, input.shortId);
+      if (
+        !link ||
+        (link.expiresAt && new Date(link.expiresAt).getTime() <= Date.now())
+      )
+        return null;
+      if (!isLocalBackend() || !link.objectKey) return link;
+      if (link.bucket !== "vault") return null;
+      const key = assertStorageTeamKey(link.teamId, link.objectKey);
+      const url = await createSignedUrl("vault", key, {
+        expiresIn: 60,
+        download: true,
+      });
+      return { ...link, url };
     }),
 });

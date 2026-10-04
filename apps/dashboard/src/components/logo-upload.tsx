@@ -2,7 +2,6 @@
 
 import { Avatar, AvatarImage } from "@midday/ui/avatar";
 import { Spinner } from "@midday/ui/spinner";
-import { nanoid } from "nanoid";
 import { useRef, useState } from "react";
 import { useUpload } from "@/hooks/use-upload";
 
@@ -24,13 +23,9 @@ export const LogoUpload = ({ logoUrl: initialLogoUrl, onUpload }: Props) => {
 
     if (!selectedFile[0]) return;
 
-    const originalFilename = selectedFile[0]?.name ?? "";
-    const extension = originalFilename.split(".").pop() || "";
-    const filename = extension ? `${nanoid()}.${extension}` : nanoid();
-
     const { url } = await uploadFile({
       bucket: "apps",
-      path: ["logos", filename],
+      path: ["logos"],
       file: selectedFile[0] as File,
     });
 

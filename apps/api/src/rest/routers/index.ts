@@ -15,6 +15,7 @@ import { invoicesRouter } from "./invoices";
 import { mcpRouter } from "./mcp";
 import { notificationsRouter } from "./notifications";
 import oauthRouter from "./oauth";
+import { realtimeRouter } from "./realtime";
 import { reportsRouter } from "./reports";
 import { searchRouter } from "./search";
 import { tagsRouter } from "./tags";
@@ -29,6 +30,7 @@ import { webhookRouter } from "./webhooks";
 const routers = new OpenAPIHono();
 
 // Mount public routes first (these handle their own auth or are fully public)
+routers.route("/realtime", realtimeRouter);
 routers.route("/oauth", oauthRouter);
 routers.route("/webhook", webhookRouter);
 routers.route("/files", filesRouter);

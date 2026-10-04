@@ -1,7 +1,8 @@
 import { limitWords, mapLanguageCodeToPostgresConfig } from "@midday/documents";
 import { DocumentClassifier } from "@midday/documents/classifier";
 import { triggerJob } from "@midday/job-client";
-import { createClient } from "@midday/supabase/job";
+import { download } from "@midday/storage";
+import { assertTeamKey } from "@midday/storage/keys";
 import type { Job } from "bullmq";
 import type { ClassifyImagePayload } from "../../schemas/documents";
 import { getDb } from "../../utils/db";
@@ -31,7 +32,6 @@ interface ImageClassificationResult {
 export class ClassifyImageProcessor extends BaseProcessor<ClassifyImagePayload> {
   async process(job: Job<ClassifyImagePayload>): Promise<void> {
     const { teamId, fileName } = job.data;
-    const supabase = createClient();
     const db = getDb();
 
     // fileName is the full path (e.g., "teamId/filename.jpg")
@@ -44,8 +44,8 @@ export class ClassifyImageProcessor extends BaseProcessor<ClassifyImagePayload> 
     });
 
     // Download file - this is a hard failure if it fails (file doesn't exist)
-    const { data: fileData } = await withTimeout(
-      supabase.storage.from("vault").download(fileName),
+    const fileData = await withTimeout(
+      download("vault", assertTeamKey(teamId, fileName)),
       TIMEOUTS.FILE_DOWNLOAD,
       `File download timed out after ${TIMEOUTS.FILE_DOWNLOAD}ms`,
     );

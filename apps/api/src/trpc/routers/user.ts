@@ -12,6 +12,7 @@ import {
   updateUser,
 } from "@midday/db/queries";
 import { generateFileKey } from "@midday/encryption";
+import { isLocalBackend } from "@midday/utils/backend";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
@@ -72,15 +73,17 @@ export const userRouter = createTRPCRouter({
     }),
 
   delete: protectedProcedure.mutation(async ({ ctx: { db, session } }) => {
-    const supabaseAdmin = await createAdminClient();
-
     const [data] = await Promise.all([
       deleteUser(db, session.user.id),
-      supabaseAdmin.auth.admin.deleteUser(session.user.id),
-      resend.contacts.remove({
-        email: session.user.email!,
-        audienceId: process.env.RESEND_AUDIENCE_ID!,
-      }),
+      isLocalBackend()
+        ? Promise.resolve()
+        : (await createAdminClient()).auth.admin.deleteUser(session.user.id),
+      process.env.RESEND_API_KEY && process.env.RESEND_AUDIENCE_ID
+        ? resend.contacts.remove({
+            email: session.user.email!,
+            audienceId: process.env.RESEND_AUDIENCE_ID,
+          })
+        : Promise.resolve(),
     ]);
 
     return data;

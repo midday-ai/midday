@@ -8,13 +8,21 @@ const app = new OpenAPIHono<Context>();
 registerMiddayBotRuntime();
 
 app.get("/", async (c) => {
+  const webhook = bot.webhooks.whatsapp;
+  if (!webhook) {
+    return c.json({ error: "Whatsapp integration is not configured" }, 503);
+  }
   await bot.initialize();
-  return bot.webhooks.whatsapp(c.req.raw);
+  return webhook(c.req.raw);
 });
 
 app.post("/", async (c) => {
+  const webhook = bot.webhooks.whatsapp;
+  if (!webhook) {
+    return c.json({ error: "Whatsapp integration is not configured" }, 503);
+  }
   await bot.initialize();
-  return bot.webhooks.whatsapp(c.req.raw);
+  return webhook(c.req.raw);
 });
 
 export const whatsappWebhookRouter = app;

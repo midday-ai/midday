@@ -2,7 +2,8 @@ import { getDb } from "@jobs/init";
 import { updateDocumentByFileName } from "@midday/db/queries";
 import { limitWords, mapLanguageCodeToPostgresConfig } from "@midday/documents";
 import { DocumentClassifier } from "@midday/documents/classifier";
-import { createClient } from "@midday/supabase/job";
+import { download } from "@midday/storage";
+import { assertTeamKey } from "@midday/storage/keys";
 import { schemaTask } from "@trigger.dev/sdk";
 import { z } from "zod";
 import { embedDocumentTags } from "./embed-document-tags";
@@ -15,12 +16,9 @@ export const classifyImage = schemaTask({
   }),
   run: async ({ teamId, fileName }) => {
     try {
-      const supabase = createClient();
       const classifier = new DocumentClassifier();
 
-      const { data: fileData } = await supabase.storage
-        .from("vault")
-        .download(fileName);
+      const fileData = await download("vault", assertTeamKey(teamId, fileName));
 
       if (!fileData) {
         throw new Error("File not found");

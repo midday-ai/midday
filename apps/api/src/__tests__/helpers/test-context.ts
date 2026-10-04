@@ -10,7 +10,7 @@ export interface TestContextOptions {
 }
 
 // Note: This is intentionally using `any` to match the tRPC context type
-// which expects specific Supabase/Drizzle types that we mock in tests
+// which expects specific auth/Drizzle types that we mock in tests
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function createTestContext(options: TestContextOptions = {}): any {
   const { teamId = "test-team-id", userId = "test-user-id" } = options;
@@ -23,7 +23,6 @@ export function createTestContext(options: TestContextOptions = {}): any {
         full_name: "Test User",
       },
     },
-    supabase: {},
     db: mockDb, // Use mock DB with query.users interface for middleware
     geo: {
       country: "US",

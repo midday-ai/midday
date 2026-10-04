@@ -87,3 +87,7 @@ For commercial use or deployments requiring a setup fee, please contact us
 for a commercial license at [engineer@midday.ai](mailto:engineer@midday.ai).
 
 By using this software, you agree to the terms of the license.
+
+## Local development
+
+Supabase remains the default backend. To run the optional Postgres/better-auth/S3/SSE profile, follow [local development](docs/local-development.md), set `NEXT_PUBLIC_BACKEND_PROVIDER=local` across the apps, and run the local infrastructure and guarded migrations.

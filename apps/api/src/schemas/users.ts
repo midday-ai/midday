@@ -1,5 +1,52 @@
 import { z } from "@hono/zod-openapi";
 import { isValidTimezone } from "@midday/location/timezones";
+import { isLocalBackend } from "@midday/utils/backend";
+
+function isPublicAvatarUrl(value: string): boolean {
+  try {
+    const url = new URL(value);
+    if (
+      !["http:", "https:"].includes(url.protocol) ||
+      url.username ||
+      url.password
+    ) {
+      return false;
+    }
+
+    if (
+      !isLocalBackend() &&
+      (url.hostname === "midday.ai" || url.hostname.endsWith(".midday.ai"))
+    ) {
+      return true;
+    }
+
+    const configuredBase = isLocalBackend()
+      ? process.env.STORAGE_PUBLIC_URL_AVATARS
+      : process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
+    if (!configuredBase) return false;
+    const base = new URL(configuredBase);
+    if (base.username || base.password || base.search || base.hash)
+      return false;
+    if (!isLocalBackend()) {
+      base.pathname = "/storage/v1/object/public/avatars/";
+    }
+    const path = decodeURIComponent(url.pathname);
+    if (
+      path.includes("\\") ||
+      path.split("/").some((segment) => segment === "." || segment === "..")
+    ) {
+      return false;
+    }
+    const prefix = `${decodeURIComponent(base.pathname).replace(/\/+$/, "")}/`;
+    return (
+      url.origin === base.origin &&
+      path.startsWith(prefix) &&
+      path.length > prefix.length
+    );
+  } catch {
+    return false;
+  }
+}
 
 export const updateUserSchema = z.object({
   fullName: z.string().min(2).max(32).optional().openapi({
@@ -13,13 +60,13 @@ export const updateUserSchema = z.object({
   avatarUrl: z
     .string()
     .url()
-    .refine((url) => url.includes("midday.ai"), {
-      message: "avatarUrl must be a midday.ai domain URL",
+    .refine(isPublicAvatarUrl, {
+      message: "avatarUrl must use the configured public avatar storage",
     })
     .optional()
     .openapi({
       description:
-        "URL to the user's avatar image. Must be hosted on midday.ai domain",
+        "URL to the user's avatar image on the configured public avatar storage",
       example: "https://cdn.midday.ai/avatars/jane-doe.jpg",
     }),
   locale: z.string().optional().openapi({

@@ -1,6 +1,6 @@
-import { getSession } from "@midday/supabase/cached-queries";
 import { sanitizeRedirectPath } from "@midday/utils/sanitize-redirect";
 import { type NextRequest, NextResponse } from "next/server";
+import { getSession } from "@/lib/auth";
 import { getTRPCClient } from "@/trpc/server";
 import { getUrl } from "@/utils/environment";
 
@@ -10,9 +10,7 @@ export async function GET(request: NextRequest) {
   const code = searchParams.get("code");
   const state = searchParams.get("state");
 
-  const {
-    data: { session },
-  } = await getSession();
+  const session = await getSession();
 
   if (!session) {
     return NextResponse.redirect(new URL("/", origin));

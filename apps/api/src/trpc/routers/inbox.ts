@@ -18,12 +18,14 @@ import {
   updateInboxSchema,
 } from "@api/schemas/inbox";
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
+import { assertStorageTeamKey } from "@api/utils/storage";
 import {
   checkInboxAttachments,
   confirmSuggestedMatch,
   createInbox,
   createInboxBlocklist,
   declineSuggestedMatch,
+  deleteDocumentsByNames,
   deleteInbox,
   deleteInboxBlocklist,
   deleteInboxMany,
@@ -38,7 +40,7 @@ import {
 } from "@midday/db/queries";
 import { triggerJob } from "@midday/job-client";
 import { logger } from "@midday/logger";
-import { remove } from "@midday/supabase/storage";
+import { remove } from "@midday/storage";
 
 export const inboxRouter = createTRPCRouter({
   get: protectedProcedure
@@ -70,7 +72,7 @@ export const inboxRouter = createTRPCRouter({
 
   delete: protectedProcedure
     .input(deleteInboxSchema)
-    .mutation(async ({ ctx: { db, supabase, teamId }, input }) => {
+    .mutation(async ({ ctx: { db, teamId }, input }) => {
       // Delete inbox item and get filePath for storage cleanup
       const result = await deleteInbox(db, {
         id: input.id,
@@ -79,11 +81,10 @@ export const inboxRouter = createTRPCRouter({
 
       // Delete file from storage if filePath exists
       if (result?.filePath && result.filePath.length > 0) {
+        const key = assertStorageTeamKey(teamId!, result.filePath);
         try {
-          await remove(supabase, {
-            bucket: "vault",
-            path: result.filePath,
-          });
+          await remove("vault", [key]);
+          await deleteDocumentsByNames(db, { teamId: teamId!, names: [key] });
         } catch (error) {
           // Log error but don't fail the deletion if file doesn't exist in storage
           logger.error("Failed to delete file from storage", {
@@ -95,22 +96,28 @@ export const inboxRouter = createTRPCRouter({
 
   deleteMany: protectedProcedure
     .input(deleteInboxManySchema)
-    .mutation(async ({ ctx: { db, supabase, teamId }, input }) => {
+    .mutation(async ({ ctx: { db, teamId }, input }) => {
       // Delete inbox items and get filePaths for storage cleanup
       const results = await deleteInboxMany(db, {
         ids: input,
         teamId: teamId!,
       });
 
-      // Delete files from storage and embeddings
+      // Validate all paths before any storage deletion.
+      for (const result of results) {
+        if (result.filePath?.length)
+          assertStorageTeamKey(teamId!, result.filePath);
+      }
       await Promise.all(
         results
           .filter((result) => result?.filePath && result.filePath.length > 0)
           .map(async (result) => {
             try {
-              await remove(supabase, {
-                bucket: "vault",
-                path: result.filePath!,
+              const key = assertStorageTeamKey(teamId!, result.filePath!);
+              await remove("vault", [key]);
+              await deleteDocumentsByNames(db, {
+                teamId: teamId!,
+                names: [key],
               });
             } catch (error) {
               logger.error("Failed to delete file from storage", {
@@ -127,6 +134,7 @@ export const inboxRouter = createTRPCRouter({
   create: protectedProcedure
     .input(createInboxItemSchema)
     .mutation(async ({ ctx: { db, teamId }, input }) => {
+      assertStorageTeamKey(teamId!, input.filePath);
       return createInbox(db, {
         displayName: input.filename,
         teamId: teamId!,
@@ -141,6 +149,7 @@ export const inboxRouter = createTRPCRouter({
   processAttachments: protectedProcedure
     .input(processAttachmentsSchema)
     .mutation(async ({ ctx: { teamId }, input }) => {
+      for (const item of input) assertStorageTeamKey(teamId!, item.filePath);
       const jobResults = await Promise.all(
         input.map((item) =>
           triggerJob(

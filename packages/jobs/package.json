@@ -20,7 +20,6 @@
     "@midday/email": "workspace:*",
     "@midday/encryption": "workspace:*",
     "@midday/notifications": "workspace:*",
-    "@midday/supabase": "workspace:*",
     "@midday/trpc": "workspace:*",
     "@sindresorhus/slugify": "catalog:",
     "@zip.js/zip.js": "^2.8.23",
@@ -30,7 +29,9 @@
     "node-xlsx": "catalog:",
     "sharp": "catalog:",
     "trigger.dev": "4.4.3",
-    "zod": "catalog:"
+    "zod": "catalog:",
+    "@midday/banking": "workspace:*",
+    "@midday/storage": "workspace:*"
   },
   "devDependencies": {
     "@types/bun": "latest",

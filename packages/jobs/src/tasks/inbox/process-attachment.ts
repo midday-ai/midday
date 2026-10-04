@@ -9,7 +9,8 @@ import {
   updateInboxWithProcessedData,
 } from "@midday/db/queries";
 import { DocumentClient } from "@midday/documents";
-import { createClient } from "@midday/supabase/job";
+import { createSignedUrl } from "@midday/storage";
+import { assertTeamKey } from "@midday/storage/keys";
 import { logger, schemaTask, tasks } from "@trigger.dev/sdk";
 import { convertHeic } from "../document/convert-heic";
 import { processDocument } from "../document/process-document";
@@ -38,7 +39,6 @@ export const processAttachment = schemaTask({
     senderEmail,
     inboxAccountId,
   }) => {
-    const supabase = createClient();
     const filename = filePath.at(-1);
 
     // Check if inbox item already exists (for retry scenarios or manual uploads)
@@ -129,13 +129,11 @@ export const processAttachment = schemaTask({
       throw Error("Inbox data not found");
     }
 
-    const { data } = await supabase.storage
-      .from("vault")
-      .createSignedUrl(filePath.join("/"), 60);
-
-    if (!data) {
-      throw Error("File not found");
-    }
+    const signedUrl = await createSignedUrl(
+      "vault",
+      assertTeamKey(teamId, filePath.join("/")),
+      { expiresIn: 60 },
+    );
 
     try {
       // Fetch team data to provide context for OCR extraction
@@ -152,7 +150,7 @@ export const processAttachment = schemaTask({
       });
 
       const result = await document.getInvoiceOrReceipt({
-        documentUrl: data?.signedUrl,
+        documentUrl: signedUrl,
         mimetype: effectiveMimetype, // Use effective mimetype (jpeg if converted from heic)
         companyName: teamData?.name,
       });

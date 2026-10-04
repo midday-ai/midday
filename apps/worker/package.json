@@ -45,7 +45,8 @@
     "papaparse": "catalog:",
     "sharp": "catalog:",
     "workbench": "workspace:*",
-    "zod": "catalog:"
+    "zod": "catalog:",
+    "@midday/storage": "workspace:*"
   },
   "devDependencies": {
     "@types/bun": "latest",

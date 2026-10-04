@@ -207,7 +207,7 @@ export function TransactionAttachments({
 
           const { path } = await uploadFile({
             bucket: "vault",
-            path: [user?.teamId ?? "", "transactions", id, filename],
+            path: [user?.teamId ?? "", "transactions", id],
             file: acceptedFile as File,
           });
 

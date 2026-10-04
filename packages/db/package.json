@@ -14,11 +14,16 @@
     "test:golden": "bun test src/test/transaction-matching.golden.test.ts",
     "test:all-matching": "bun test src/test/transaction-matching*.test.ts",
     "test:reports": "bun test src/test/reports.test.ts",
-    "test:e2e": "bun test src/test/calculations-e2e.test.ts --exit --timeout 30000",
-    "test:e2e:setup": "PGPASSWORD=postgres psql -h ${TEST_DB_HOST:-localhost} -p ${TEST_DB_PORT:-5433} -U postgres -d midday_test -f src/test/helpers/setup-test-db.sql && bunx drizzle-kit push --config=drizzle.config.test.ts --force",
+    "test:e2e": "bun test src/test/calculations-e2e.test.ts src/test/migrations.test.ts src/test/storage-documents.test.ts --exit --timeout 30000",
+    "test:e2e:setup": "PGPASSWORD=postgres psql -v ON_ERROR_STOP=1 -h ${TEST_DB_HOST:-localhost} -p ${TEST_DB_PORT:-5433} -U postgres -d midday_test -c 'DROP SCHEMA IF EXISTS public CASCADE; DROP SCHEMA IF EXISTS drizzle CASCADE; CREATE SCHEMA public;' && NEXT_PUBLIC_BACKEND_PROVIDER=local DATABASE_MIGRATION_URL=${TEST_DATABASE_URL:-postgres://postgres:postgres@localhost:5433/midday_test} DATABASE_SSL=disable bun run src/migrate.ts",
     "test:watch": "bun test --watch",
     "validate-golden": "bun run src/test/validate-golden-dataset.ts",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "bun run src/migrate.ts",
+    "db:check": "drizzle-kit check",
+    "db:studio": "drizzle-kit studio",
+    "test:parity": "bun test src/test/sql-parity.test.ts --exit --timeout 30000"
   },
   "exports": {
     "./client": "./src/client.ts",
@@ -27,14 +32,14 @@
     "./queries": "./src/queries/index.ts",
     "./errors": "./src/errors.ts",
     "./schema": "./src/schema.ts",
-    "./sql": "./src/sql.ts",
     "./utils/api-keys": "./src/utils/api-keys.ts",
     "./utils/search-query": "./src/utils/search-query.ts",
     "./utils/health": "./src/utils/health.ts",
-    "./utils/currency": "./src/utils/currency.ts",
-    "./utils/tax": "./src/utils/tax.ts",
     "./utils/blocklist": "./src/utils/blocklist.ts",
-    "./utils/invoice-recurring": "./src/utils/invoice-recurring.ts"
+    "./utils/invoice-recurring": "./src/utils/invoice-recurring.ts",
+    "./migrate": "./src/migrate.ts",
+    "./queries/users": "./src/queries/users.ts",
+    "./ssl": "./src/ssl.ts"
   },
   "dependencies": {
     "@date-fns/tz": "catalog:",

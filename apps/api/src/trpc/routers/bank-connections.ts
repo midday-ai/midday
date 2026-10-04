@@ -4,15 +4,16 @@ import {
   deleteBankConnectionSchema,
   getBankConnectionsSchema,
   reconnectBankConnectionSchema,
+  updateBankConnectionReconnectSchema,
 } from "@api/schemas/bank-connections";
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
-
 import {
   addProviderAccounts,
   createBankConnection,
   deleteBankConnection,
   getBankConnections,
   reconnectBankConnection,
+  updateBankConnectionExpiry,
 } from "@midday/db/queries";
 import type {
   DeleteConnectionPayload,
@@ -20,8 +21,26 @@ import type {
 } from "@midday/jobs/schema";
 import { tasks } from "@trigger.dev/sdk";
 import { TRPCError } from "@trpc/server";
+import { addDays } from "date-fns";
 
 export const bankConnectionsRouter = createTRPCRouter({
+  updateReconnect: protectedProcedure
+    .input(updateBankConnectionReconnectSchema)
+    .mutation(async ({ input, ctx: { db, teamId } }) => {
+      const connection = await updateBankConnectionExpiry(db, {
+        id: input.id,
+        teamId: teamId!,
+        referenceId: input.referenceId,
+        expiresAt: addDays(new Date(), input.accessValidForDays).toDateString(),
+      });
+      if (!connection)
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Bank connection not found",
+        });
+      return connection;
+    }),
+
   get: protectedProcedure
     .input(getBankConnectionsSchema)
     .query(async ({ ctx: { db, teamId }, input }) => {

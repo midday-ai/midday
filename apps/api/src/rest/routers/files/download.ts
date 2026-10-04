@@ -1,18 +1,18 @@
 import type { Context } from "@api/rest/types";
 import { downloadFileSchema, downloadInvoiceSchema } from "@api/schemas/files";
-import { createAdminClient } from "@api/services/supabase";
 import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 import { getInvoiceById } from "@midday/db/queries";
 import { verifyFileKey } from "@midday/encryption";
 import { PdfTemplate, renderToStream } from "@midday/invoice";
 import { verify } from "@midday/invoice/token";
-import { download } from "@midday/supabase/storage";
+import { getStream } from "@midday/storage";
+import { assertTeamKey } from "@midday/storage/keys";
 import { HTTPException } from "hono/http-exception";
 import { publicMiddleware } from "../../middleware";
 import { withDatabase } from "../../middleware/db";
 import { withFileAuth } from "../../middleware/file-auth";
 import { withClientIp } from "../../middleware/ip";
-import { getContentTypeFromFilename, normalizeAndValidatePath } from "./utils";
+import { normalizeAndValidatePath } from "./utils";
 
 const app = new OpenAPIHono<Context>();
 
@@ -85,26 +85,12 @@ app.openapi(
     const { path, filename } = c.req.valid("query");
     const { normalizedPath } = normalizeAndValidatePath(path);
 
-    const supabase = await createAdminClient();
-
-    const { data, error } = await download(supabase, {
-      bucket: "vault",
-      path: normalizedPath,
-    });
-
-    if (error || !data) {
-      throw new HTTPException(404, {
-        message: error?.message || "File not found",
-      });
-    }
-
-    // Try to get content type from blob, fallback to application/octet-stream
-    const blob = await data.arrayBuffer();
-    const contentType =
-      data.type ||
-      (filename
-        ? getContentTypeFromFilename(filename)
-        : "application/octet-stream");
+    const result = await getStream(
+      "vault",
+      assertTeamKey(c.get("teamId"), normalizedPath),
+    );
+    if (!result) throw new HTTPException(404, { message: "File not found" });
+    const contentType = result.contentType || "application/octet-stream";
 
     const headers: Record<string, string> = {
       "Content-Type": contentType,
@@ -112,10 +98,11 @@ app.openapi(
     };
 
     if (filename) {
-      headers["Content-Disposition"] = `attachment; filename="${filename}"`;
+      headers["Content-Disposition"] =
+        `attachment; filename*=UTF-8''${encodeURIComponent(filename)}`;
     }
 
-    return new Response(blob, { headers });
+    return new Response(result.body, { headers });
   },
 );
 
@@ -301,7 +288,8 @@ downloadInvoiceApp.openapi(
         const filename = isReceipt
           ? `receipt-${invoiceData.invoiceNumber}.pdf`
           : `${invoiceData.invoiceNumber}.pdf`;
-        headers["Content-Disposition"] = `attachment; filename="${filename}"`;
+        headers["Content-Disposition"] =
+          `attachment; filename*=UTF-8''${encodeURIComponent(filename)}`;
       }
 
       return new Response(blob, { headers });

@@ -1,10 +1,11 @@
+import { getDb } from "@jobs/init";
 import {
   type ApiAccount,
   type DbAccount,
   findMatchingAccount,
   type MatchingResult,
-} from "@midday/supabase/account-matching";
-import { createClient } from "@midday/supabase/job";
+} from "@midday/banking/account-matching";
+import { updateBankAccountMatch } from "@midday/db/queries";
 import { logger } from "@trigger.dev/sdk";
 
 // Re-export types for convenience
@@ -14,21 +15,22 @@ export { findMatchingAccount };
 /**
  * Matches API accounts to existing database accounts and updates their account_id.
  *
- * Uses findMatchingAccount from @midday/supabase for the pure matching logic,
+ * Uses findMatchingAccount from @midday/banking for the pure matching logic,
  * then handles the database updates and logging.
  */
 export async function matchAndUpdateAccountIds({
   existingAccounts,
   apiAccounts,
   connectionId,
+  teamId,
   provider,
 }: {
   existingAccounts: DbAccount[];
   apiAccounts: ApiAccount[];
   connectionId: string;
+  teamId: string;
   provider: string;
 }): Promise<MatchingResult> {
-  const supabase = createClient();
   const matchedDbIds = new Set<string>();
   const results: MatchingResult = { matched: 0, unmatched: 0, errors: 0 };
 
@@ -42,30 +44,24 @@ export async function matchAndUpdateAccountIds({
     if (match) {
       matchedDbIds.add(match.id);
 
-      const updates: Record<string, string | null> = {
-        account_id: apiAccount.id,
-      };
-      if (apiAccount.resource_id) {
-        updates.account_reference = apiAccount.resource_id;
-      }
-      if (apiAccount.iban) {
-        updates.iban = apiAccount.iban;
-      }
-
-      const { error } = await supabase
-        .from("bank_accounts")
-        .update(updates)
-        .eq("id", match.id);
-
-      if (error) {
+      try {
+        const updated = await updateBankAccountMatch(getDb(), {
+          id: match.id,
+          teamId,
+          connectionId,
+          accountId: apiAccount.id,
+          accountReference: apiAccount.resource_id || undefined,
+          iban: apiAccount.iban || undefined,
+        });
+        if (!updated) throw new Error("Bank account not found");
+        results.matched++;
+      } catch (error) {
         logger.warn(`Failed to update ${provider} account`, {
           resource_id: apiAccount.resource_id,
           dbAccountId: match.id,
-          error: error.message,
+          error: error instanceof Error ? error.message : String(error),
         });
         results.errors++;
-      } else {
-        results.matched++;
       }
     } else {
       logger.warn(`No matching DB account found for ${provider} account`, {

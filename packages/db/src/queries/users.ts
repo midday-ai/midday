@@ -1,6 +1,7 @@
+import { isLocalBackend } from "@midday/utils/backend";
 import { and, eq, inArray, sql } from "drizzle-orm";
-import type { Database } from "../client";
-import { teams, users, usersOnTeam } from "../schema";
+import type { Database, DatabaseOrTransaction, primaryDb } from "../client";
+import { authUsers, teams, users, usersOnTeam } from "../schema";
 
 export const getUserById = async (db: Database, id: string) => {
   const [result] = await db
@@ -122,30 +123,54 @@ export const getUserTeamId = async (db: Database, userId: string) => {
   return result?.teamId || null;
 };
 
-export const deleteUser = async (db: Database, id: string) => {
-  // Find teams where this user is a member
-  const teamsWithUser = await db
-    .select({
-      teamId: usersOnTeam.teamId,
-      memberCount: sql<number>`count(${usersOnTeam.userId})`.as("member_count"),
+export async function createUserProfile(
+  db: DatabaseOrTransaction | typeof primaryDb,
+  profile: {
+    id: string;
+    email: string;
+    fullName?: string | null;
+    avatarUrl?: string | null;
+    locale?: string | null;
+  },
+) {
+  await db
+    .insert(users)
+    .values({
+      id: profile.id,
+      email: profile.email,
+      fullName: profile.fullName || null,
+      avatarUrl: profile.avatarUrl || null,
+      locale: profile.locale ?? "en",
     })
-    .from(usersOnTeam)
-    .where(eq(usersOnTeam.userId, id))
-    .groupBy(usersOnTeam.teamId);
+    .onConflictDoNothing({ target: users.id });
+}
 
-  // Extract team IDs with only one member (this user)
-  const teamIdsToDelete = teamsWithUser
-    .filter((team) => team.memberCount === 1)
-    .map((team) => team.teamId);
-
-  // Delete the user and teams with only this user as a member
-  // Foreign key constraints with cascade delete will handle related records
-  await Promise.all([
-    db.delete(users).where(eq(users.id, id)),
-    teamIdsToDelete.length > 0
-      ? db.delete(teams).where(inArray(teams.id, teamIdsToDelete))
-      : Promise.resolve(),
-  ]);
-
-  return { id };
-};
+export const deleteUser = async (db: Database, id: string) =>
+  db.transaction(async (tx) => {
+    const memberships = tx
+      .select({ teamId: usersOnTeam.teamId })
+      .from(usersOnTeam)
+      .where(eq(usersOnTeam.userId, id));
+    await tx
+      .select({ id: teams.id })
+      .from(teams)
+      .where(inArray(teams.id, memberships))
+      .for("update");
+    const memberCounts = await tx
+      .select({
+        teamId: usersOnTeam.teamId,
+        memberCount: sql<number>`count(*)::integer`,
+      })
+      .from(usersOnTeam)
+      .where(inArray(usersOnTeam.teamId, memberships))
+      .groupBy(usersOnTeam.teamId);
+    const singleMemberTeams = memberCounts
+      .filter((team) => team.memberCount === 1)
+      .map((team) => team.teamId);
+    if (singleMemberTeams.length)
+      await tx.delete(teams).where(inArray(teams.id, singleMemberTeams));
+    if (isLocalBackend())
+      await tx.delete(authUsers).where(eq(authUsers.id, id));
+    else await tx.delete(users).where(eq(users.id, id));
+    return { id };
+  });

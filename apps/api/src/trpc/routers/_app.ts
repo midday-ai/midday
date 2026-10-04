@@ -31,6 +31,7 @@ import { overviewRouter } from "./overview";
 import { reportsRouter } from "./reports";
 import { searchRouter } from "./search";
 import { shortLinksRouter } from "./short-links";
+import { storageRouter } from "./storage";
 
 import { tagsRouter } from "./tags";
 import { teamRouter } from "./team";
@@ -83,6 +84,7 @@ export const appRouter = createTRPCRouter({
   user: userRouter,
   search: searchRouter,
   shortLinks: shortLinksRouter,
+  storage: storageRouter,
   apiKeys: apiKeysRouter,
 });
 

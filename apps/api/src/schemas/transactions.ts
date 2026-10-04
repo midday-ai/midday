@@ -945,7 +945,7 @@ export const transactionAttachmentPreSignedUrlResponseSchema = z.object({
     description:
       "Pre-signed URL for accessing the attachment, valid for 60 seconds",
     example:
-      "https://service.midday.ai/storage/v1/object/sign/vault/transactions/receipt.pdf?token=abc123&expires=1640995200",
+      "https://storage.example.com/vault/transactions/receipt.pdf?token=abc123&expires=1640995200",
   }),
   expiresAt: z.string().datetime().openapi({
     description: "ISO 8601 timestamp when the URL expires",

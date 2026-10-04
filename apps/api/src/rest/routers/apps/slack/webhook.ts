@@ -8,8 +8,12 @@ const app = new OpenAPIHono<Context>();
 registerMiddayBotRuntime();
 
 app.post("/", async (c) => {
+  const webhook = bot.webhooks.slack;
+  if (!webhook) {
+    return c.json({ error: "Slack integration is not configured" }, 503);
+  }
   await bot.initialize();
-  return bot.webhooks.slack(c.req.raw);
+  return webhook(c.req.raw);
 });
 
 export { app as webhookRouter };

@@ -3,7 +3,6 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@midday/ui/avatar";
 import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
-import { stripSpecialCharacters } from "@midday/utils";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 import { forwardRef, useRef, useState } from "react";
@@ -44,11 +43,9 @@ export const AvatarUpload = forwardRef<HTMLInputElement, Props>(
       const { files } = evt.target;
       const selectedFile = files as FileList;
 
-      const filename = stripSpecialCharacters(selectedFile[0]?.name ?? "");
-
       const { url } = await uploadFile({
         bucket: "avatars",
-        path: [userId, filename],
+        path: [userId],
         file: selectedFile[0] as File,
       });
 

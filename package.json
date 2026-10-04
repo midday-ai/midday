@@ -6,6 +6,10 @@
     "apps/*"
   ],
   "scripts": {
+    "infra:up": "docker compose up -d --wait postgres redis minio && docker compose run --rm minio-init",
+    "infra:down": "docker compose down",
+    "infra:reset": "docker compose down -v && bun run infra:up",
+    "infra:logs": "docker compose logs -f --tail=100",
     "build": "turbo build",
     "clean": "git clean -xdf node_modules",
     "clean:workspaces": "turbo clean",
@@ -23,7 +27,12 @@
     "format": "biome format --write .",
     "lint": "turbo lint",
     "lint:fix": "turbo lint:fix",
-    "typecheck": "turbo typecheck"
+    "typecheck": "turbo typecheck",
+    "db:migrate": "bun run --cwd packages/db db:migrate",
+    "db:generate": "bun run --cwd packages/db db:generate",
+    "db:check": "bun run --cwd packages/db db:check",
+    "db:studio": "bun run --cwd packages/db db:studio",
+    "test:e2e:local": "playwright test --config tests/e2e/playwright.config.ts"
   },
   "packageManager": "bun@1.3.11",
   "catalog": {
@@ -53,7 +62,7 @@
     "sharp": "0.34.5",
     "typescript": "^6.0.2",
     "uuid": "^13.0.0",
-    "zod": "^4.3.6"
+    "zod": "4.3.6"
   },
   "trustedDependencies": [
     "@biomejs/biome",
@@ -65,7 +74,11 @@
   "devDependencies": {
     "@biomejs/biome": "2.4.10",
     "turbo": "2.9.3",
-    "typescript": "^6.0.2"
+    "typescript": "^6.0.2",
+    "@playwright/test": "1.58.2",
+    "pg": "8.20.0",
+    "@types/pg": "8.20.0",
+    "@aws-sdk/client-s3": "3.1146.0"
   },
   "dependencies": {
     "toolpick": "^0.4.0",
